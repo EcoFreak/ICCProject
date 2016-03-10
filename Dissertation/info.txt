@@ -1,0 +1,6 @@
+http://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2Fdom%2FASTVisitor.html
+https://books.google.pt/books?id=6Ob1ANNVcXcC&pg=PA667&lpg=PA667&dq=get+compilation+astvisitor+java&source=bl&ots=jnFx8PRewu&sig=VmdjqFH1zmGFoHTSt8Inu_VSwWU&hl=pt-PT&sa=X&ved=0ahUKEwjK1eKKr7LLAhWC1hQKHSGXCKgQ6AEIPDAE#v=onepage&q=get%20compilation%20astvisitor%20java&f=false
+http://www.vogella.com/tutorials/EclipseJDT/article.html
+http://stackoverflow.com/questions/11062485/astparser-methoddeclaration-typeparamaters
+
+http://www.eclipse.org/articles/article.php?file=Article-JavaCodeManipulation_AST/index.html
