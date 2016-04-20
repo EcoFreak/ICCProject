@@ -1,5 +1,6 @@
 package pt.iscte.hmcgf.extractor.relations;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -32,20 +33,26 @@ public class GraphRelationStorage implements RelationStorage
 	}
 
 	@Override
-	public void addFieldRelation(FieldRelation r)
-	{
-		prep(r.getSource(), r.getDestination());
-		addRelation(r);
-	}
-	@Override
 	public Collection<Relation> getRelationsForType(String type)
 	{
-		return graph.outgoingEdgesOf(type);
+		if (graph.containsVertex(type))
+			return graph.outgoingEdgesOf(type);
+		return new ArrayList<Relation>();
 	}
 	// TODO REMOVE TEMPORARY METHOD
 	public DirectedGraph<String, Relation> getGraph()
 	{
 		return graph;
+	}
+	@Override
+	public int getTypeCount()
+	{
+		return graph.vertexSet().size();
+	}
+	@Override
+	public int getRelationCount()
+	{
+		return graph.edgeSet().size();
 	}
 
 }

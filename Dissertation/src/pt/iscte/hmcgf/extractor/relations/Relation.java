@@ -1,28 +1,47 @@
 package pt.iscte.hmcgf.extractor.relations;
+
 public abstract class Relation
 {
 	private String			source;
+	private String			intermediary;
 	private String			destination;
 	private boolean			isStatic;
 	private RelationType	type;
-	public Relation(String source, String destination, boolean isStatic, RelationType type)
+	public Relation(String source, String destination, String intermediary, boolean isStatic, RelationType type)
 	{
 		this.source = source;
 		this.destination = destination;
+		this.intermediary = intermediary;
 		this.isStatic = isStatic;
 		this.type = type;
 	}
 	public enum RelationType
 	{
-		Method, Field
+		Method
 	}
 	public String getSource()
 	{
 		return this.source;
 	}
+	public String getIntermediary()
+	{
+		return this.intermediary;
+	}
 	public String getDestination()
 	{
 		return this.destination;
+	}
+	public String getSourceName()
+	{
+		return this.source.substring(this.source.lastIndexOf(".") + 1);
+	}
+	public String getIntermediaryName()
+	{
+		return this.intermediary.substring(this.intermediary.lastIndexOf(".") + 1);
+	}
+	public String getDestinationName()
+	{
+		return this.destination.substring(this.destination.lastIndexOf(".") + 1);
 	}
 	public boolean IsStatic()
 	{

@@ -11,13 +11,6 @@ public interface RelationStorage
 	 *            method relation object
 	 */
 	public void addMethodRelation(MethodRelation r);
-	/**
-	 * Stores a given field relation
-	 * 
-	 * @param r
-	 *            field relation object
-	 */
-	public void addFieldRelation(FieldRelation r);
 
 	/**
 	 * Retrieves all relations found for given type
@@ -26,4 +19,7 @@ public interface RelationStorage
 	 * @return
 	 */
 	public Collection<Relation> getRelationsForType(String type);
+
+	public int getTypeCount();
+	public int getRelationCount();
 }

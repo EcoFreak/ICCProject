@@ -5,9 +5,10 @@ public class MethodRelation extends Relation
 	private String	methodName;
 	private boolean	isConstructor;
 	private int		numParamenters;
-	public MethodRelation(String source, String destination, String methodName, boolean isStatic, boolean isConstructor, int numParameters)
+	public MethodRelation(String source, String destination, String intermediary, String methodName, boolean isStatic, boolean isConstructor,
+			int numParameters)
 	{
-		super(source, destination, isStatic, RelationType.Method);
+		super(source, destination, intermediary, isStatic, RelationType.Method);
 		this.methodName = methodName;
 		this.isConstructor = isConstructor;
 		this.numParamenters = numParameters;
@@ -27,8 +28,11 @@ public class MethodRelation extends Relation
 	@Override
 	public String toString()
 	{
-		return ((IsStatic() ? "static " : "")) +
-				((isConstructor() ? "new " : "")) +
+		if (isConstructor())
+			return "new " + getDestinationName() + "( " + getSourceName() + " )";
+		if (IsStatic())
+			return "static " + getIntermediaryName() + "." + getMethodName() + "( " + getSourceName() + " )";
+		return ((IsStatic() ? "static " : "")) + ((isConstructor() ? "new " : "")) +
 				methodName + "( " + numParamenters + ((numParamenters > 1) ? " parameters" : " parameter") + " )";
 	}
 }

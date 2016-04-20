@@ -1,19 +1,19 @@
 package pt.iscte.hmcgf.extractor;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import com.google.common.reflect.ClassPath;
-import pt.iscte.hmcgf.extractor.relations.GraphRelationStorage;
 import pt.iscte.hmcgf.extractor.relations.MethodRelation;
 import pt.iscte.hmcgf.extractor.relations.RelationStorage;
 
 public class ReflectionRelationExtractor implements RelationExtractor
 {
-	private GraphRelationStorage storage;
-	public ReflectionRelationExtractor(GraphRelationStorage storage)
+	private RelationStorage storage;
+	public ReflectionRelationExtractor(RelationStorage storage)
 	{
 		this.storage = storage;
 	}
@@ -21,21 +21,39 @@ public class ReflectionRelationExtractor implements RelationExtractor
 	public boolean analyseClasses(String wildcard)
 	{
 		List<Class<?>> classes = getAllClasses(wildcard);
-		for (Class<?> class1 : classes)
+		for (Class<?> c : classes)
 		{
-			Method[] methods = class1.getMethods();
-			for (Method method : methods)
-			{
-				String ret = method.getReturnType().getCanonicalName();
-				for (Class<?> method2 : method.getParameterTypes())
-				{
-					storage.addMethodRelation(
-							new MethodRelation(method2.getCanonicalName(), ret, method.getName(), Modifier.isStatic(method.getModifiers()), false,
-									method.getParameterCount()));
-				}
-			}
+			handleMethods(c);
+			handleConstructors(c);
 		}
 		return classes.isEmpty();
+	}
+	private void handleConstructors(Class<?> c)
+	{
+		Constructor<?>[] constructors = c.getConstructors();
+		for (Constructor<?> constructor : constructors)
+		{
+			for (Class<?> paramType : constructor.getParameterTypes())
+			{
+				storage.addMethodRelation(
+						new MethodRelation(paramType.getCanonicalName(), c.getCanonicalName(), c.getCanonicalName(), constructor.getName(),
+								Modifier.isStatic(constructor.getModifiers()), true, constructor.getParameterCount()));
+			}
+		}
+	}
+	private void handleMethods(Class<?> c)
+	{
+		Method[] methods = c.getDeclaredMethods();
+		for (Method method : methods)
+		{
+			String ret = method.getReturnType().getCanonicalName();
+			for (Class<?> paramType : method.getParameterTypes())
+			{
+				storage.addMethodRelation(
+						new MethodRelation(paramType.getCanonicalName(), ret, c.getCanonicalName(), method.getName(),
+								Modifier.isStatic(method.getModifiers()), false, method.getParameterCount()));
+			}
+		}
 	}
 	private List<Class<?>> getAllClasses(String wildcard)
 	{
@@ -58,7 +76,7 @@ public class ReflectionRelationExtractor implements RelationExtractor
 					{
 
 					}
-					
+
 				}
 			}
 		}
