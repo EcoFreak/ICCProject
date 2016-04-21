@@ -28,11 +28,12 @@ public class MethodRelation extends Relation
 	@Override
 	public String toString()
 	{
+		String parameters = ", " + numParamenters + ((numParamenters > 1) ? " parameters" : " parameter");
 		if (isConstructor())
-			return "new " + getDestinationName() + "( " + getSourceName() + " )";
+			return "new " + getDestinationName() + "( " + getSourceName() + parameters + " )";
 		if (IsStatic())
-			return "static " + getIntermediaryName() + "." + getMethodName() + "( " + getSourceName() + " )";
-		return ((IsStatic() ? "static " : "")) + ((isConstructor() ? "new " : "")) +
-				methodName + "( " + numParamenters + ((numParamenters > 1) ? " parameters" : " parameter") + " )";
+			return "static " + getIntermediaryName() + "." + getMethodName() + "( " + getSourceName() + parameters + " )";
+		return "( instance of " + getIntermediaryName() + ")." + methodName + "( " + getSourceName() + parameters + " )";
+
 	}
 }

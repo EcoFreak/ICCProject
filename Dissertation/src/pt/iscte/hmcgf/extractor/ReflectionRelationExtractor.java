@@ -23,35 +23,45 @@ public class ReflectionRelationExtractor implements RelationExtractor
 		List<Class<?>> classes = getAllClasses(wildcard);
 		for (Class<?> c : classes)
 		{
-			handleMethods(c);
-			handleConstructors(c);
+			handleMethods(c, wildcard);
+			handleConstructors(c, wildcard);
 		}
 		return classes.isEmpty();
 	}
-	private void handleConstructors(Class<?> c)
+	private void handleConstructors(Class<?> c, String wildcard)
 	{
 		Constructor<?>[] constructors = c.getConstructors();
 		for (Constructor<?> constructor : constructors)
 		{
 			for (Class<?> paramType : constructor.getParameterTypes())
 			{
-				storage.addMethodRelation(
-						new MethodRelation(paramType.getCanonicalName(), c.getCanonicalName(), c.getCanonicalName(), constructor.getName(),
-								Modifier.isStatic(constructor.getModifiers()), true, constructor.getParameterCount()));
+				if (paramType.getCanonicalName().startsWith(wildcard))
+				{
+					storage.addMethodRelation(
+							new MethodRelation(paramType.getCanonicalName(), c.getCanonicalName(), c.getCanonicalName(), constructor.getName(),
+									Modifier.isStatic(constructor.getModifiers()), true, constructor.getParameterCount()));
+				}
 			}
 		}
 	}
-	private void handleMethods(Class<?> c)
+	private void handleMethods(Class<?> c, String wildcard)
 	{
-		Method[] methods = c.getDeclaredMethods();
+		// Method[] methods = c.getDeclaredMethods();
+		Method[] methods = c.getMethods();
 		for (Method method : methods)
 		{
+			if (method.getDeclaringClass().equals(Object.class))
+				continue;
 			String ret = method.getReturnType().getCanonicalName();
 			for (Class<?> paramType : method.getParameterTypes())
 			{
-				storage.addMethodRelation(
-						new MethodRelation(paramType.getCanonicalName(), ret, c.getCanonicalName(), method.getName(),
-								Modifier.isStatic(method.getModifiers()), false, method.getParameterCount()));
+				if (paramType.getCanonicalName().startsWith(wildcard))
+				{
+					// TODO ADD OTHER PARAMETER INFO
+					storage.addMethodRelation(
+							new MethodRelation(paramType.getCanonicalName(), ret, c.getCanonicalName(), method.getName(),
+									Modifier.isStatic(method.getModifiers()), false, method.getParameterCount()));
+				}
 			}
 		}
 	}
@@ -74,7 +84,7 @@ public class ReflectionRelationExtractor implements RelationExtractor
 					}
 					catch (NoClassDefFoundError ex)
 					{
-
+						// TODO HANDLE ERROR
 					}
 
 				}

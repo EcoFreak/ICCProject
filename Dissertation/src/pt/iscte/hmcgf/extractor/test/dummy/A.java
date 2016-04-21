@@ -1,6 +1,6 @@
 package pt.iscte.hmcgf.extractor.test.dummy;
 
-public class A
+public class A extends D
 {
 	private B b;
 	public A()

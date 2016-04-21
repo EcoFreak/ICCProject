@@ -24,8 +24,17 @@ public class C
 	{
 		return new B();
 	}
+
+	public int getAInt(A c)
+	{
+		return 3;
+	}
 	public int getSomething()
 	{
 		return this.something;
+	}
+	public void userTheForce(C c, A a)
+	{
+		
 	}
 }

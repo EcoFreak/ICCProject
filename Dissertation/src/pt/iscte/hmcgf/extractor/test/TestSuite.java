@@ -23,12 +23,12 @@ public class TestSuite
 	@Test
 	public void testNumberOfRelations()
 	{
-		assertEquals(10, graph.getTypeCount());
+		assertEquals(10, graph.getRelationCount());
 	}
 	@Test
 	public void testNumberOfTypes()
 	{
-		assertEquals(10, graph.getRelationCount());
+		assertEquals(10, graph.getTypeCount());
 	}
 	@Test
 	public void testDirectStaticRelation()

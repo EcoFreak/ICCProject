@@ -16,9 +16,8 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/jgraph-5.13.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/jgrapht-ext-0.9.1.jar"/>
 	<classpathentry kind="lib" path="lib/jgrapht-core-0.9.1.jar"/>
+	<classpathentry kind="lib" path="lib/jgrapht-ext-0.9.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
