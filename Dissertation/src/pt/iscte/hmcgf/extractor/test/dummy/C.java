@@ -25,7 +25,7 @@ public class C
 		return new B();
 	}
 
-	public int getAInt(A c)
+	public int getAInt(D c)
 	{
 		return 3;
 	}

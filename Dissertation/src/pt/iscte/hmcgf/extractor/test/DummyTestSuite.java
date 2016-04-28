@@ -8,7 +8,7 @@ import pt.iscte.hmcgf.extractor.ReflectionRelationExtractor;
 import pt.iscte.hmcgf.extractor.relations.GraphRelationStorage;
 import pt.iscte.hmcgf.extractor.relations.RelationStorage;
 
-public class TestSuite
+public class DummyTestSuite
 {
 	private RelationStorage graph;
 
@@ -22,7 +22,7 @@ public class TestSuite
 
 	@Test
 	public void testNumberOfRelations()
-	{
+	{		
 		assertEquals(10, graph.getRelationCount());
 	}
 	@Test
