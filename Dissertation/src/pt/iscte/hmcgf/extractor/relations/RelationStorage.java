@@ -10,16 +10,41 @@ public interface RelationStorage
 	 * @param r
 	 *            method relation object
 	 */
-	public void addMethodRelation(MethodRelation r);
+	public void addRelation(Relation r);
 
 	/**
-	 * Retrieves all relations found for given type
+	 * Returns all relations found for given type
 	 * 
 	 * @param type
 	 * @return
 	 */
 	public Collection<Relation> getRelationsForType(String type);
 
+	/**
+	 * Returns number of types stored
+	 * 
+	 * @return number of types
+	 */
 	public int getTypeCount();
+
+	/**
+	 * Returns number of relations between types
+	 * 
+	 * @return number of relations
+	 */
 	public int getRelationCount();
+
+	/**
+	 * Returns a collection with all stored types
+	 * 
+	 * @return collection of String (Type)
+	 */
+	public Collection<String> getAllTypes();
+
+	/**
+	 * Returns a collection with all stored relations
+	 * 
+	 * @return collection of Relation
+	 */
+	public Collection<Relation> getAllRelations();
 }

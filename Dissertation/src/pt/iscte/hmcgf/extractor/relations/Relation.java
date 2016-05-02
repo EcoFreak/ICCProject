@@ -1,23 +1,56 @@
 package pt.iscte.hmcgf.extractor.relations;
 
-public abstract class Relation
+import java.util.ArrayList;
+import java.util.Collection;
+
+public class Relation
 {
-	private String			source;
-	private String			intermediary;
-	private String			destination;
-	private boolean			isStatic;
-	private RelationType	type;
-	public Relation(String source, String destination, String intermediary, boolean isStatic, RelationType type)
+	private String				source;
+	private String				intermediary;
+	private String				destination;
+	private String				methodName;
+	/**
+	 * mainType only used for subtype relation
+	 */
+	private String				mainType;
+	private Collection<String>	parameters;
+	private boolean				isStatic;
+	private boolean				isConstructor;
+	private boolean				requiresCast;
+
+	public Relation(String source, String destination, String intermediary,
+			String methodName, boolean isStatic, boolean isConstructor,
+			boolean requiresCast, String mainType, Collection<String> parameters)
 	{
 		this.source = source;
 		this.destination = destination;
 		this.intermediary = intermediary;
 		this.isStatic = isStatic;
-		this.type = type;
+		this.methodName = methodName;
+		this.isConstructor = isConstructor;
+		this.requiresCast = requiresCast;
+		this.parameters = new ArrayList<String>(parameters);
+		this.mainType = mainType;
 	}
-	public enum RelationType
+	public String getMethodName()
 	{
-		Method
+		return this.methodName;
+	}
+	public boolean isConstructor()
+	{
+		return isConstructor;
+	}
+	public boolean requiresCast()
+	{
+		return this.requiresCast;
+	}
+	public Collection<String> getParamenters()
+	{
+		return parameters;
+	}
+	public int getNumParameters()
+	{
+		return parameters.size();
 	}
 	public String getSource()
 	{
@@ -30,6 +63,14 @@ public abstract class Relation
 	public String getDestination()
 	{
 		return this.destination;
+	}
+	public String getMainType()
+	{
+		return this.mainType;
+	}
+	public String getMainTypeName()
+	{
+		return (this.mainType == null) ? null : this.mainType.substring(this.mainType.lastIndexOf(".") + 1);
 	}
 	public String getSourceName()
 	{
@@ -47,10 +88,10 @@ public abstract class Relation
 	{
 		return isStatic;
 	}
+
 	@Override
 	public int hashCode()
 	{
-		// TODO Auto-generated method stub
 		return super.hashCode();
 	}
 	@Override
@@ -61,11 +102,18 @@ public abstract class Relation
 		if (obj == this)
 			return true;
 		Relation r = (Relation) obj;
-		return source.equals(r.source) && destination.equals(r.destination) && type.equals(r.type);
+		return source.equals(r.source) && destination.equals(r.destination);
 	}
+
 	@Override
 	public String toString()
 	{
-		return type.toString() + ":" + this.source + "->" + this.destination;
+		String parameters = ", " + getNumParameters() + ((getNumParameters() > 1) ? " parameters" : " parameter");
+		if (isConstructor())
+			return "new " + getDestinationName() + "( " + getSourceName() + parameters + " )";
+		if (IsStatic())
+			return "static " + getIntermediaryName() + "." + getMethodName() + "( " + getSourceName() + parameters + " )";
+		return "( instance of " + getIntermediaryName() + ")." + methodName + "( " + getSourceName() + parameters + " )";
+
 	}
 }

@@ -19,17 +19,13 @@ public class GraphRelationStorage implements RelationStorage
 		if (!graph.containsVertex(d))
 			graph.addVertex(d);
 	}
-	private void addRelation(Relation r)
-	{
-		if (!graph.containsEdge(r))
-			graph.addEdge(r.getSource(), r.getDestination(), r);
-	}
 	@Override
-	public void addMethodRelation(MethodRelation r)
+	public void addRelation(Relation r)
 	{
 		System.out.println("Adding Method realtion " + r);
 		prep(r.getSource(), r.getDestination());
-		addRelation(r);
+		if (!graph.containsEdge(r))
+			graph.addEdge(r.getSource(), r.getDestination(), r);
 	}
 
 	@Override
@@ -53,6 +49,16 @@ public class GraphRelationStorage implements RelationStorage
 	public int getRelationCount()
 	{
 		return graph.edgeSet().size();
+	}
+	@Override
+	public Collection<String> getAllTypes()
+	{
+		return this.graph.vertexSet();
+	}
+	@Override
+	public Collection<Relation> getAllRelations()
+	{
+		return this.graph.edgeSet();
 	}
 
 }
