@@ -20,7 +20,9 @@ public class Main
 	{
 		GraphRelationStorage s = new GraphRelationStorage();
 		ReflectionRelationExtractor e = new ReflectionRelationExtractor(s);
-		e.analyseClasses("pt.iscte.hmcgf.extractor.test.dummy");
+		//e.analyseClasses("pt.iscte.hmcgf.extractor.test.dummy");
+		e.analyseClasses("javax.mail");
+
 		AttributeMap vertexAttrMap = JGraphModelAdapter.createDefaultVertexAttributes();
 		vertexAttrMap.applyValue("bounds", new Rectangle(0, 0, 300, 30));
 		AttributeMap edgeAttrMap = JGraphModelAdapter.createDefaultEdgeAttributes(s.getGraph());

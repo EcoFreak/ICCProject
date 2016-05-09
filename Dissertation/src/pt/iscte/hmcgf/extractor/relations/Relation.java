@@ -32,6 +32,7 @@ public class Relation
 		this.parameters = new ArrayList<String>(parameters);
 		this.mainType = mainType;
 	}
+
 	public String getMethodName()
 	{
 		return this.methodName;
@@ -102,7 +103,9 @@ public class Relation
 		if (obj == this)
 			return true;
 		Relation r = (Relation) obj;
-		return source.equals(r.source) && destination.equals(r.destination);
+		return isEquivalent(r)
+				&& ((mainType == null && r.mainType == null) || (mainType != null && mainType.equals(r.mainType)))
+				&& requiresCast == r.requiresCast && source.equals(r.source);
 	}
 
 	@Override
@@ -115,5 +118,18 @@ public class Relation
 			return "static " + getIntermediaryName() + "." + getMethodName() + "( " + getSourceName() + parameters + " )";
 		return "( instance of " + getIntermediaryName() + ")." + methodName + "( " + getSourceName() + parameters + " )";
 
+	}
+	/**
+	 * Checks if two relations are equal or equivalent (equal except in the source type)
+	 * 
+	 * @param r
+	 *            relation to test against
+	 * @return
+	 */
+	public boolean isEquivalent(Relation r)
+	{
+		return destination.equals(r.destination) && intermediary.equals(r.intermediary)
+				&& methodName.equals(r.methodName)
+				&& parameters.equals(r.parameters) && isStatic == r.isStatic && isConstructor == r.isConstructor;
 	}
 }

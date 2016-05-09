@@ -18,6 +18,7 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/jgrapht-core-0.9.1.jar"/>
 	<classpathentry kind="lib" path="lib/jgrapht-ext-0.9.1.jar"/>
+	<classpathentry kind="lib" path="lib/mail-1.4.7.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
