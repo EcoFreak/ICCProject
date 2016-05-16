@@ -1,7 +1,6 @@
 package pt.iscte.hmcgf.extractor.test;
 
 import java.awt.Rectangle;
-import java.util.Collection;
 import java.util.Map;
 import javax.swing.JFrame;
 import org.jgraph.JGraph;
@@ -11,7 +10,6 @@ import com.jgraph.layout.JGraphFacade;
 import com.jgraph.layout.graph.JGraphSimpleLayout;
 import pt.iscte.hmcgf.extractor.ReflectionRelationExtractor;
 import pt.iscte.hmcgf.extractor.relations.GraphRelationStorage;
-import pt.iscte.hmcgf.extractor.relations.Relation;
 
 public class Main
 {

@@ -1,11 +1,9 @@
 package pt.iscte.hmcgf.extractor.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Collection;
-import javax.mail.Message;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.MimeMessage;
 import org.junit.Before;
 import org.junit.Test;
 import pt.iscte.hmcgf.extractor.ReflectionRelationExtractor;
@@ -15,21 +13,17 @@ import pt.iscte.hmcgf.extractor.relations.RelationStorage;
 
 public class DummyTestSuite
 {
-	private RelationStorage	graph;
-	public final String		NAMESPACE		= "javax.mail";
-	public final String		SESSION			= Session.class.getCanonicalName();
-	public final String		MIME_MESSAGE	= MimeMessage.class.getCanonicalName();
-	public final String		TRANSPORT		= Transport.class.getCanonicalName();
-
+	private RelationStorage		graph;
+	public static final String	A	= "pt.iscte.hmcgf.extractor.test.dummy.A";
+	public static final String	B	= "pt.iscte.hmcgf.extractor.test.dummy.B";
+	public static final String	C	= "pt.iscte.hmcgf.extractor.test.dummy.C";
+	public static final String	D	= "pt.iscte.hmcgf.extractor.test.dummy.D";
 	@Before
 	public void setUpBefore() throws Exception
 	{
-		long startTime = System.nanoTime();
 		graph = new GraphRelationStorage();
 		ReflectionRelationExtractor e = new ReflectionRelationExtractor(graph);
-		e.analyseClasses(NAMESPACE);
-		long estimatedTime = System.nanoTime() - startTime;
-		System.out.println("Loading of type graph for namespace " + NAMESPACE + " ocurred in " + String.format("%,8d", estimatedTime) + " ns");
+		e.analyseClasses("pt.iscte.hmcgf.extractor.test.dummy");
 	}
 
 	@Test
@@ -43,53 +37,165 @@ public class DummyTestSuite
 		assertTrue(graph.getTypeCount() > 0);
 	}
 	@Test
-	public void testSession()
+	public void testDirectStaticRelation()
 	{
-		/*
-		 * Checks for the existance of: Message message = new MimeMessage(session);
-		 */
-		Collection<Relation> relationsForType = graph.getRelationsForType(SESSION);
-		// TODO ALSO CHECK TO GO TO SUPER TYPE (MESSAGE)
-		assertNotNull(relationsForType);
-		assertTrue(relationsForType.size() > 0);
+		Collection<Relation> relationsForC = graph.getRelationsForType(C);
 		boolean found = false;
-		for (Relation relation : relationsForType)
+		assertTrue(relationsForC.size() > 0);
+		for (Relation relation : relationsForC)
 		{
-			if (relation.getDestination().equals(MIME_MESSAGE) &&
-					relation.isConstructor() &&
-					relation.getIntermediary().equals(MIME_MESSAGE) &&
-					relation.getNumParameters() == 1)
-			{
+			if (relation.IsStatic()
+					&& relation.getIntermediary().equals(relation.getSource())
+					&& relation.getIntermediary().equals(C)
+					&& relation.getDestination().equals(B))
 				found = true;
-				break;
-			}
+
 		}
 		assertTrue(found);
 	}
 	@Test
-	public void testMessage()
+	public void testIndirectStaticRelation()
 	{
-		/*
-		 * Checks for the existance of: Transport.send(message);
-		 */
-		// TODO CHECK WHY IS TEST FAILING
-		Collection<Relation> relationsForType = graph.getRelationsForType(Message.class.getCanonicalName());
-		assertNotNull(relationsForType);
-		assertTrue(relationsForType.size() > 0);
+		Collection<Relation> relationForA = graph.getRelationsForType(A);
 		boolean found = false;
-		for (Relation relation : relationsForType)
+		assertTrue(relationForA.size() > 0);
+		for (Relation relation : relationForA)
 		{
-			System.out.println(relation.getMethodName());
-			if (relation.getDestination().equals("void") &&
-					relation.IsStatic() &&
-					relation.getIntermediary().equals(TRANSPORT) &&
-					relation.getMethodName().equals("send") &&
-					relation.getNumParameters() == 1)
-			{
+			if (relation.IsStatic()
+					&& !relation.getIntermediary().equals(relation.getSource())
+					&& relation.getIntermediary().equals(B)
+					&& relation.getDestination().equals(C)
+					&& relation.getSource().equals(A))
 				found = true;
-				break;
-			}
+
 		}
 		assertTrue(found);
+	}
+
+	@Test
+	public void testParameterType()
+	{
+		for (Relation r : graph.getAllRelations())
+		{
+			if (r.requiresCast())
+				assertTrue(r.getParamenters().contains(r.getMainType()));
+			else
+				assertTrue(r.getParamenters().contains(r.getSource()));
+		}
+	}
+	@Test
+	public void testRelations()
+	{
+		for (Relation r : graph.getAllRelations())
+		{
+			assertTrue(graph.getRelationsForType(r.getSource()).contains(r));
+		}
+	}
+
+	@Test
+	public void testParameterCount()
+	{
+		for (Relation r : graph.getAllRelations())
+		{
+			if (r.getNumParameters() == 0)
+				fail("Relation without any parameters");
+		}
+	}
+
+	@Test
+	public void testExistanceSubTypeRelation()
+	{
+		int count = 0;
+		for (Relation r : graph.getAllRelations())
+		{
+			if (r.requiresCast())
+				count++;
+		}
+		assertTrue(count > 0);
+	}
+	@Test
+	public void testValidRelations()
+	{
+		for (Relation r : graph.getAllRelations())
+		{
+			assertNotNull(r.getSource());
+			assertNotNull(r.getIntermediary());
+			assertNotNull(r.getDestination());
+			if (r.requiresCast())
+				assertNotNull(r.getMainType());
+		}
+	}
+	@Test
+	public void testSubTypeRelation()
+	{
+		int count = 0;
+		for (Relation r : graph.getAllRelations())
+		{
+			if (r.requiresCast())
+			{
+				assertNotNull(r.getMainType());
+				Collection<Relation> relationsForMainType = graph.getRelationsForType(r.getMainType());
+				try
+				{
+					assertTrue(Class.forName(r.getMainType()).isAssignableFrom(Class.forName(r.getSource())));
+					assertTrue(relationsForMainType.size() > 0);
+					for (Relation mainTypeRelation : relationsForMainType)
+					{
+						if (mainTypeRelation.isEquivalent(r))
+							count++;
+					}
+				}
+				catch (ClassNotFoundException e)
+				{
+					fail(e.getMessage());
+				}
+				assertTrue(relationsForMainType.size() > 0);
+			}
+		}
+		assertTrue(count > 0);
+	}
+	@Test
+	public void testRelationSource()
+	{
+		Collection<String> allTypes = graph.getAllTypes();
+		for (String type : allTypes)
+		{
+			Collection<Relation> relationsForType = graph.getRelationsForType(type);
+			for (Relation relation : relationsForType)
+			{
+				assertTrue(relation.getSource().equals(type));
+			}
+		}
+	}
+	@Test
+	public void testIfAllTypesExists()
+	{
+		Collection<String> allTypes = graph.getAllTypes();
+		assertTrue(allTypes.size() > 0);
+		assertTrue(allTypes.contains(A));
+		assertTrue(allTypes.contains(B));
+		assertTrue(allTypes.contains(C));
+		assertTrue(allTypes.contains(D));
+	}
+	@Test
+	public void testConstructors()
+	{
+		int count = 0;
+		for (Relation r : graph.getAllRelations())
+		{
+			if (r.isConstructor())
+				count++;
+		}
+		assertTrue(count > 0);
+	}
+
+	@Test
+	public void testNonStaticConstructors()
+	{
+		for (Relation r : graph.getAllRelations())
+		{
+			if (r.isConstructor() && r.IsStatic())
+				fail("Found one static constructor");
+		}
 	}
 }

@@ -10,7 +10,7 @@ public interface RelationStorage
 	 * @param r
 	 *            method relation object
 	 */
-	public void addRelation(Relation r);
+	public boolean addRelation(Relation r);
 
 	/**
 	 * Returns all relations found for given type

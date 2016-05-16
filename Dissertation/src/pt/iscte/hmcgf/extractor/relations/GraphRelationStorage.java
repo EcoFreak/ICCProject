@@ -3,14 +3,14 @@ package pt.iscte.hmcgf.extractor.relations;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DirectedPseudograph;
 
 public class GraphRelationStorage implements RelationStorage
 {
-	private DirectedGraph<String, Relation> graph;
+	private DirectedPseudograph<String, Relation> graph;
 	public GraphRelationStorage()
 	{
-		graph = new DefaultDirectedGraph<String, Relation>(Relation.class);
+		graph = new DirectedPseudograph<String, Relation>(Relation.class);
 	}
 	private void prep(String s, String d)
 	{
@@ -20,12 +20,14 @@ public class GraphRelationStorage implements RelationStorage
 			graph.addVertex(d);
 	}
 	@Override
-	public void addRelation(Relation r)
+	public boolean addRelation(Relation r)
 	{
 		System.out.println("Adding Method realtion " + r);
 		prep(r.getSource(), r.getDestination());
 		if (!graph.containsEdge(r))
-			graph.addEdge(r.getSource(), r.getDestination(), r);
+			return graph.addEdge(r.getSource(), r.getDestination(), r);
+		else
+			return false;
 	}
 
 	@Override
