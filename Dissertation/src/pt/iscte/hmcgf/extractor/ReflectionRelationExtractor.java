@@ -1,16 +1,21 @@
 package pt.iscte.hmcgf.extractor;
 
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.reflect.ClassPath;
 import pt.iscte.hmcgf.extractor.relations.Relation;
 import pt.iscte.hmcgf.extractor.relations.RelationStorage;
 
@@ -28,7 +33,7 @@ public class ReflectionRelationExtractor implements RelationExtractor
 	{
 		this.reflectionsInstance = new Reflections(wildcard);
 		this.storedSubTypes = ArrayListMultimap.create();
-		List<Class<?>> classes = getAllClasses(wildcard);
+		Set<Class<?>> classes = getAllClasses(wildcard);
 		for (Class<?> c : classes)
 		{
 			handleMethods(c, wildcard);
@@ -109,31 +114,19 @@ public class ReflectionRelationExtractor implements RelationExtractor
 			this.storedSubTypes.putAll(c, reflectionsInstance.getSubTypesOf(c));
 		return this.storedSubTypes.get(c);
 	}
-	private List<Class<?>> getAllClasses(String wildcard)
+	private Set<Class<?>> getAllClasses(String wildcard)
 	{
-		final ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
-		try
-		{
-			for (final ClassPath.ClassInfo info : ClassPath.from(loader).getTopLevelClassesRecursive(wildcard))
-			{
-				final Class<?> clazz;
-				try
-				{
-					clazz = info.load();
-					classes.add(clazz);
-					// do something with your clazz
-				}
-				catch (NoClassDefFoundError ex)
-				{
-					// TODO HANDLE ERROR
-				}
-			}
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+		Set<Class<?>> classes = null;
+		List<ClassLoader> classLoadersList = new LinkedList<ClassLoader>();
+		classLoadersList.add(ClasspathHelper.contextClassLoader());
+		classLoadersList.add(ClasspathHelper.staticClassLoader());
+
+		Reflections reflections = new Reflections(new ConfigurationBuilder()
+				.setScanners(new SubTypesScanner(false /* don't exclude Object.class */), new ResourcesScanner())
+				.setUrls(ClasspathHelper.forClassLoader(classLoadersList.toArray(new ClassLoader[0])))
+				.filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix(wildcard))));
+
+		classes = reflections.getSubTypesOf(Object.class);
 		return classes;
 	}
 	@Override

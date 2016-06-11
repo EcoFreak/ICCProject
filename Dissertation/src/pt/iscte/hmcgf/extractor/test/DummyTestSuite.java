@@ -18,6 +18,7 @@ public class DummyTestSuite
 	public static final String	B	= "pt.iscte.hmcgf.extractor.test.dummy.B";
 	public static final String	C	= "pt.iscte.hmcgf.extractor.test.dummy.C";
 	public static final String	D	= "pt.iscte.hmcgf.extractor.test.dummy.D";
+	public static final String	Z	= "pt.iscte.hmcgf.extractor.test.dummy.D.Z";
 	@Before
 	public void setUpBefore() throws Exception
 	{
@@ -197,5 +198,12 @@ public class DummyTestSuite
 			if (r.isConstructor() && r.IsStatic())
 				fail("Found one static constructor");
 		}
+	}
+
+	@Test
+	public void testInnerClassDetection()
+	{
+		System.out.println(graph.getAllTypes());
+		assertTrue(graph.getAllTypes().contains(Z));
 	}
 }

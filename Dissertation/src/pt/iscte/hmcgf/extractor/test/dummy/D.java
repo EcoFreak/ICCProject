@@ -12,4 +12,11 @@ public class D
 	{
 		return null;
 	}
+	public class Z
+	{
+		public Z(A a)
+		{
+			
+		}
+	}
 }

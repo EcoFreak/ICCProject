@@ -72,8 +72,7 @@ public class JavaMailTestSuite
 		/*
 		 * Checks for the existance of: Transport.send(message);
 		 */
-		// TODO CHECK WHY IS TEST FAILING
-		for (Relation	r: graph.getAllRelations())
+		for (Relation r : graph.getAllRelations())
 		{
 			System.out.println(r);
 		}

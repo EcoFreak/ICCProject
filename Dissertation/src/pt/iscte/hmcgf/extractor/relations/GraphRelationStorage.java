@@ -22,7 +22,6 @@ public class GraphRelationStorage implements RelationStorage
 	@Override
 	public boolean addRelation(Relation r)
 	{
-		System.out.println("Adding Method realtion " + r);
 		prep(r.getSource(), r.getDestination());
 		if (!graph.containsEdge(r))
 			return graph.addEdge(r.getSource(), r.getDestination(), r);
