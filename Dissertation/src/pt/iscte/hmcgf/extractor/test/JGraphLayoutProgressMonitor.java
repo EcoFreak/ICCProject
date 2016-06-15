@@ -18,14 +18,13 @@ import javax.swing.ProgressMonitor;
 import com.jgraph.layout.JGraphLayoutProgress;
 
 /**
- * Utility progress monitor for a layout progress object. Implements a
- * property change listener to update itself based on the running layout.
- * The listener is added to the progress object in the constructor and
- * removed from it when the close method is called.
+ * Utility progress monitor for a layout progress object. Implements a property change listener to update itself based on the running layout. The
+ * listener is added to the progress object in the constructor and removed from it when the close method is called.
  * 
  */
 public class JGraphLayoutProgressMonitor extends ProgressMonitor implements
-		PropertyChangeListener {
+		PropertyChangeListener
+{
 
 	/**
 	 * References the progress being monitored.
@@ -42,8 +41,8 @@ public class JGraphLayoutProgressMonitor extends ProgressMonitor implements
 	 * @param message
 	 *            The message to display.
 	 */
-	public JGraphLayoutProgressMonitor(Component component,
-			JGraphLayoutProgress progress, String message) {
+	public JGraphLayoutProgressMonitor(Component component, JGraphLayoutProgress progress, String message)
+	{
 		super(component, message, "", 0, 100);
 		this.progress = progress;
 		progress.addPropertyChangeListener(this);
@@ -52,9 +51,11 @@ public class JGraphLayoutProgressMonitor extends ProgressMonitor implements
 	/*
 	 * (non-Javadoc)
 	 */
-	public void propertyChange(PropertyChangeEvent evt) {
+	public void propertyChange(PropertyChangeEvent evt)
+	{
 		if (evt.getPropertyName().equals(
-				JGraphLayoutProgress.PROGRESS_PROPERTY)) {
+				JGraphLayoutProgress.PROGRESS_PROPERTY))
+		{
 			int newValue = Integer.parseInt(String.valueOf(evt
 					.getNewValue()));
 			setProgress(newValue);
@@ -63,7 +64,8 @@ public class JGraphLayoutProgressMonitor extends ProgressMonitor implements
 		// Updates the maximum property. This is set after the layout
 		// run method has been called.
 		else if (evt.getPropertyName().equals(
-				JGraphLayoutProgress.MAXIMUM_PROPERTY)) {
+				JGraphLayoutProgress.MAXIMUM_PROPERTY))
+		{
 			int newValue = Integer.parseInt(String.valueOf(evt
 					.getNewValue()));
 			setMaximum(newValue);
@@ -75,10 +77,10 @@ public class JGraphLayoutProgressMonitor extends ProgressMonitor implements
 	}
 
 	/**
-	 * Overrides the parent's implementation to remove the property change
-	 * listener from the progress.
+	 * Overrides the parent's implementation to remove the property change listener from the progress.
 	 */
-	public void close() {
+	public void close()
+	{
 		progress.removePropertyChangeListener(this);
 		super.close();
 	}

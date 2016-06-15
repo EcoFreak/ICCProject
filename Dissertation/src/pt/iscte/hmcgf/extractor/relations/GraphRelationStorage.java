@@ -2,7 +2,7 @@ package pt.iscte.hmcgf.extractor.relations;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DirectedPseudograph;
 
 public class GraphRelationStorage implements RelationStorage
@@ -37,7 +37,7 @@ public class GraphRelationStorage implements RelationStorage
 		return new ArrayList<Relation>();
 	}
 	// TODO REMOVE TEMPORARY METHOD
-	public DirectedGraph<String, Relation> getGraph()
+	public Graph<String, Relation> getGraph()
 	{
 		return graph;
 	}

@@ -1,22 +1,15 @@
-/*
- 	* $Id: JGraphLayoutPanel.java,v 1.2 2009-10-30 14:16:52 david Exp $
- * Copyright (c) 2001-2005, Gaudenz Alder
- * 
- * All rights reserved. 
- * 
- * This file is licensed under the JGraph software license, a copy of which
- * will have been provided to you in the file LICENSE at the root of your
- * installation directory. If you are unable to locate this file please
- * contact JGraph sales for another copy.
- */
 package pt.iscte.hmcgf.extractor.test;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map;
 import javax.swing.AbstractAction;
@@ -30,7 +23,10 @@ import javax.swing.JSplitPane;
 import javax.swing.ProgressMonitor;
 import javax.swing.SwingUtilities;
 import org.jgraph.JGraph;
+import org.jgraph.graph.AttributeMap;
 import org.jgraph.graph.GraphConstants;
+import org.jgrapht.Graph;
+import org.jgrapht.ext.JGraphModelAdapter;
 import com.jgraph.layout.JGraphFacade;
 import com.jgraph.layout.JGraphLayout;
 import com.jgraph.layout.graph.JGraphSimpleLayout;
@@ -43,33 +39,51 @@ import com.jgraph.layout.tree.JGraphRadialTreeLayout;
 import com.jgraph.layout.tree.JGraphTreeLayout;
 import com.l2fprod.common.swing.JTaskPane;
 import com.l2fprod.common.swing.JTaskPaneGroup;
+import pt.iscte.hmcgf.extractor.relations.Relation;
 
 public class JGraphLayoutPanel extends JPanel
 {
 
-	protected static JGraphGraphFactory		graphFactory		= new JGraphGraphFactory();
-
+	protected static JGraphGraphFactory		graphFactory			= new JGraphGraphFactory();
 	protected JGraph						graph;
+	protected Graph							sourceGraph;
+	protected JTaskPane						taskPane				= new JTaskPane();
+	protected JCheckBox						flushOriginCheckBox		= new JCheckBox("Flush", true);
+	protected JCheckBox						hidePrimitiveCheckbox	= new JCheckBox("Hide primitive types", false);
+	protected JGraphLayoutMorphingManager	morpher					= new JGraphLayoutMorphingManager();
 
-	protected JTaskPane						taskPane			= new JTaskPane();
-
-	protected JCheckBox						flushOriginCheckBox	= new JCheckBox("Flush", true),
-													directedCheckBox = new JCheckBox("Directed", true);
-
-	/**
-	 * Holds the morphing manager.
-	 */
-	protected JGraphLayoutMorphingManager	morpher				= new JGraphLayoutMorphingManager();
-
-	public JGraphLayoutPanel(JGraph graph)
+	public JGraphLayoutPanel(Graph graph)
 	{
 		super(new BorderLayout());
 		setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
 
 		// Configures the graph
-		this.graph = graph;
+		this.sourceGraph = graph;
+
+		// Filter primitive types
+		AttributeMap vertexAttrMap = JGraphModelAdapter.createDefaultVertexAttributes();
+		vertexAttrMap.applyValue("bounds", new Rectangle(0, 0, 300, 30));
+		AttributeMap edgeAttrMap = JGraphModelAdapter.createDefaultEdgeAttributes(sourceGraph);
+		JGraphModelAdapter adapter = new JGraphModelAdapter(sourceGraph, vertexAttrMap, edgeAttrMap);
+		this.graph = new JGraph(adapter);
 
 		// Configures the taskpane
+		configureTaskpane();
+
+		// Adds the split pane
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(taskPane), new JScrollPane(this.graph));
+		add(splitPane, BorderLayout.CENTER);
+
+		// Adds the status bar
+		JLabel version = new JLabel(JGraph.VERSION);
+		version.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+		version.setFont(version.getFont().deriveFont(Font.PLAIN));
+		add(version, BorderLayout.SOUTH);
+	}
+
+	@SuppressWarnings({ "serial", "deprecation" })
+	public void configureTaskpane()
+	{
 		JTaskPaneGroup taskGroup = new JTaskPaneGroup();
 		taskGroup.setText("Layout");
 		taskGroup.add(new AbstractAction("Hierarchical")
@@ -137,18 +151,20 @@ public class JGraphLayoutPanel extends JPanel
 				reset();
 			}
 		});
-		// taskGroup.add(new AbstractAction("Tilt") {
-		// public void actionPerformed(ActionEvent e) {
-		// execute(new JGraphSimpleLayout(JGraphSimpleLayout.TYPE_TILT,
-		// 100, 100));
-		// }
-		// });
-		// taskGroup.add(new AbstractAction("Random") {
-		// public void actionPerformed(ActionEvent e) {
-		// execute(new JGraphSimpleLayout(JGraphSimpleLayout.TYPE_RANDOM,
-		// 640, 480));
-		// }
-		// });
+		taskGroup.add(new AbstractAction("Tilt")
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				execute(new JGraphSimpleLayout(JGraphSimpleLayout.TYPE_TILT, 100, 100));
+			}
+		});
+		taskGroup.add(new AbstractAction("Random")
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				execute(new JGraphSimpleLayout(JGraphSimpleLayout.TYPE_RANDOM, 640, 480));
+			}
+		});
 
 		taskPane.add(taskGroup);
 
@@ -158,9 +174,7 @@ public class JGraphLayoutPanel extends JPanel
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				graphFactory.insertGraph(graph,
-						JGraphGraphFactory.RANDOM_CONNECTED,
-						createCellAttributes(new Point2D.Double(0, 0)),
+				graphFactory.insertGraph(graph, JGraphGraphFactory.RANDOM_CONNECTED, createCellAttributes(new Point2D.Double(0, 0)),
 						createEdgeAttributes());
 				reset();
 			}
@@ -169,9 +183,7 @@ public class JGraphLayoutPanel extends JPanel
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				graphFactory.insertGraph(graph, JGraphGraphFactory.TREE,
-						createCellAttributes(new Point2D.Double(0, 0)),
-						createEdgeAttributes());
+				graphFactory.insertGraph(graph, JGraphGraphFactory.TREE, createCellAttributes(new Point2D.Double(0, 0)), createEdgeAttributes());
 				reset();
 			}
 		});
@@ -195,22 +207,10 @@ public class JGraphLayoutPanel extends JPanel
 		taskGroup.setText("Options");
 		flushOriginCheckBox.setOpaque(false);
 		taskGroup.add(flushOriginCheckBox);
-		directedCheckBox.setOpaque(false);
-		taskGroup.add(directedCheckBox);
+		hidePrimitiveCheckbox.setOpaque(false);
+		taskGroup.add(hidePrimitiveCheckbox);
 		taskPane.add(taskGroup);
-
-		// Adds the split pane
-		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-				new JScrollPane(taskPane), new JScrollPane(graph));
-		add(splitPane, BorderLayout.CENTER);
-
-		// Adds the status bar
-		JLabel version = new JLabel(JGraph.VERSION);
-		version.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-		version.setFont(version.getFont().deriveFont(Font.PLAIN));
-		add(version, BorderLayout.SOUTH);
 	}
-
 	/**
 	 * Shows something useful. Should be called after the enclosing frame has been made visible.
 	 */
@@ -231,6 +231,46 @@ public class JGraphLayoutPanel extends JPanel
 		graph.clearSelection();
 		JGraphLayoutMorphingManager.fitViewport(graph);
 	}
+	private JGraph createGraph()
+	{
+		Graph clone = (Graph) cloneObject(sourceGraph);
+		if (hidePrimitiveCheckbox.isSelected())
+			clone.removeAllVertices(getPrimitiveNodes(clone));
+		AttributeMap vertexAttrMap = JGraphModelAdapter.createDefaultVertexAttributes();
+		vertexAttrMap.applyValue("bounds", new Rectangle(0, 0, 300, 30));
+		AttributeMap edgeAttrMap = JGraphModelAdapter.createDefaultEdgeAttributes(sourceGraph);
+		JGraphModelAdapter adapter = new JGraphModelAdapter(sourceGraph, vertexAttrMap, edgeAttrMap);
+
+		return new JGraph(adapter);
+	}
+	private static Object cloneObject(Object obj)
+	{
+		try
+		{
+			Object clone = obj.getClass().newInstance();
+			for (Field field : obj.getClass().getDeclaredFields())
+			{
+				field.setAccessible(true);
+				field.set(clone, field.get(obj));
+			}
+			return clone;
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}
+	private Collection<String> getPrimitiveNodes(Graph g)
+	{
+		Collection<String> list = g.vertexSet();
+		String[] primitive = new String[] { "int", "void", "double", "boolean" };
+		for (String r : list)
+		{
+			if (r.equals("void") || r.equals("int") || r.equals("double") || r.equals("int"))
+				list.add(r);
+		}
+		return list;
+	}
 
 	/**
 	 * Executes the current layout on the current graph by creating a facade and progress monitor for the layout and invoking it's run method in a
@@ -239,14 +279,13 @@ public class JGraphLayoutPanel extends JPanel
 	 */
 	public void execute(final JGraphLayout layout)
 	{
-		if (graph != null && graph.isEnabled() && graph.isMoveable()
-				&& layout != null)
+		if (graph != null && graph.isEnabled() && graph.isMoveable() && layout != null)
 		{
+			this.graph = createGraph();
 			final JGraphFacade facade = createFacade(graph);
 
-			final ProgressMonitor progressMonitor = (layout instanceof JGraphLayout.Stoppable) ? createProgressMonitor(
-					graph, (JGraphLayout.Stoppable) layout)
-					: null;
+			final ProgressMonitor progressMonitor = (layout instanceof JGraphLayout.Stoppable)
+					? createProgressMonitor(graph, (JGraphLayout.Stoppable) layout) : null;
 			new Thread()
 			{
 				public void run()
@@ -255,15 +294,7 @@ public class JGraphLayoutPanel extends JPanel
 					{
 						try
 						{
-							// Executes the layout and checks if the user has
-							// clicked
-							// on cancel during the layout run. If no progress
-							// monitor
-							// has been displayed or cancel has not been pressed
-							// then
-							// the result of the layout algorithm is processed.
 							layout.run(facade);
-
 							SwingUtilities.invokeLater(new Runnable()
 							{
 								public void run()
@@ -271,29 +302,12 @@ public class JGraphLayoutPanel extends JPanel
 									boolean ignoreResult = false;
 									if (progressMonitor != null)
 									{
-										ignoreResult = progressMonitor
-												.isCanceled();
+										ignoreResult = progressMonitor.isCanceled();
 										progressMonitor.close();
 									}
 									if (!ignoreResult)
 									{
-
-										// Processes the result of the layout
-										// algorithm
-										// by creating a nested map based on the
-										// global
-										// settings and passing the map to a
-										// morpher
-										// for the graph that should be changed.
-										// The morpher will animate the change
-										// and then
-										// invoke the edit method on the graph
-										// layout
-										// cache.
-										Map map = facade.createNestedMap(true,
-												(flushOriginCheckBox
-														.isSelected()) ? true
-																: false);
+										Map map = facade.createNestedMap(true, (flushOriginCheckBox.isSelected()) ? true : false);
 										morpher.morph(graph, map);
 										graph.requestFocus();
 									}
@@ -303,12 +317,11 @@ public class JGraphLayoutPanel extends JPanel
 						catch (Exception e)
 						{
 							e.printStackTrace();
-							JOptionPane
-									.showMessageDialog(graph, e.getMessage());
+							JOptionPane.showMessageDialog(graph, e.getMessage());
 						}
 					}
 				}
-			}.start(); // fork
+			}.start();
 		}
 	}
 
@@ -327,7 +340,7 @@ public class JGraphLayoutPanel extends JPanel
 		facade.setIgnoresUnconnectedCells(true);
 		facade.setIgnoresCellsInGroups(true);
 		facade.setIgnoresHiddenCells(true);
-		facade.setDirected(directedCheckBox.isSelected());
+		facade.setDirected(true);
 
 		// Removes all existing control points from edges
 		facade.resetControlPoints();
