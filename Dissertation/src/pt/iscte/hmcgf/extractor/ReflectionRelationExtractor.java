@@ -36,8 +36,15 @@ public class ReflectionRelationExtractor implements RelationExtractor
 		Set<Class<?>> classes = getAllClasses(wildcard);
 		for (Class<?> c : classes)
 		{
-			handleMethods(c, wildcard);
-			handleConstructors(c, wildcard);
+			try
+			{
+				handleMethods(c, wildcard);
+				handleConstructors(c, wildcard);
+			}
+			catch (NoClassDefFoundError e)
+			{
+				// SUPRESS WARNING WITH NOCLASSDEF ERRORS
+			}
 		}
 		return classes.isEmpty();
 	}
@@ -56,7 +63,7 @@ public class ReflectionRelationExtractor implements RelationExtractor
 		}
 	}
 
-	private void handleMethods(Class<?> c, String wildcard)
+	private void handleMethods(Class<?> c, String wildcard) throws NoClassDefFoundError
 	{
 		Method[] methods = c.getMethods();
 		for (Method method : methods)
@@ -86,12 +93,12 @@ public class ReflectionRelationExtractor implements RelationExtractor
 		storage.addRelation(
 				new Relation(from.getCanonicalName(), to.getCanonicalName(), intermidiary.getCanonicalName(), method.getName(),
 						Modifier.isStatic(method.getModifiers()), false, false, null, parameters));
-		for (Class<?> subType : getSubTypesOfClass(from))
-		{
-			storage.addRelation(
-					new Relation(subType.getCanonicalName(), to.getCanonicalName(), intermidiary.getCanonicalName(), method.getName(),
-							Modifier.isStatic(method.getModifiers()), false, true, from.getCanonicalName(), parameters));
-		}
+//		for (Class<?> subType : getSubTypesOfClass(from))
+//		{
+//			storage.addRelation(
+//					new Relation(subType.getCanonicalName(), to.getCanonicalName(), intermidiary.getCanonicalName(), method.getName(),
+//							Modifier.isStatic(method.getModifiers()), false, true, from.getCanonicalName(), parameters));
+//		}
 
 	}
 	private void addConstructorRelationForAllSubTypes(Class<?> from, Class<?> intermidiary, Class<?> to, Constructor<?> constructor,
@@ -100,12 +107,12 @@ public class ReflectionRelationExtractor implements RelationExtractor
 		storage.addRelation(
 				new Relation(from.getCanonicalName(), to.getCanonicalName(), intermidiary.getCanonicalName(), constructor.getName(),
 						Modifier.isStatic(constructor.getModifiers()), true, false, null, parameters));
-		for (Class<?> subType : getSubTypesOfClass(from))
-		{
-			storage.addRelation(
-					new Relation(subType.getCanonicalName(), to.getCanonicalName(), intermidiary.getCanonicalName(), constructor.getName(),
-							Modifier.isStatic(constructor.getModifiers()), true, true, from.getCanonicalName(), parameters));
-		}
+//		for (Class<?> subType : getSubTypesOfClass(from))
+//		{
+//			storage.addRelation(
+//					new Relation(subType.getCanonicalName(), to.getCanonicalName(), intermidiary.getCanonicalName(), constructor.getName(),
+//							Modifier.isStatic(constructor.getModifiers()), true, true, from.getCanonicalName(), parameters));
+//		}
 
 	}
 	private Collection<Class<?>> getSubTypesOfClass(Class<?> c)

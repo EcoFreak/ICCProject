@@ -26,6 +26,25 @@
   		<artifactId>jgraph</artifactId>
   		<version>5.13.0.0</version>
   	</dependency>
+  	<dependency>
+		<groupId>org.apache.poi</groupId>
+		<artifactId>poi</artifactId>
+		<version>3.8</version>
+	</dependency>
+	<!-- https://mvnrepository.com/artifact/javax.xml/jaxp-api -->
+	<dependency>
+    	<groupId>javax.xml</groupId>
+    	<artifactId>jaxp-api</artifactId>
+	    <version>1.4.2</version>
+	</dependency>
+	<!-- https://mvnrepository.com/artifact/jfree/jfreechart -->
+	<dependency>
+    	<groupId>jfree</groupId>
+    	<artifactId>jfreechart</artifactId>
+    	<version>1.0.13</version>
+	</dependency>
+
+
   </dependencies>
   <dependencyManagement>
   	<dependencies>
