@@ -16,26 +16,21 @@ public class Main
 		GraphRelationStorage s = new GraphRelationStorage();
 		ReflectionRelationExtractor e = new ReflectionRelationExtractor(s);
 		// e.analyseClasses("pt.iscte.hmcgf.extractor.test.dummy");
-//		e.analyseClasses("javax.mail");
-//		 e.analyseClasses("javax.xml");
-		 e.analyseClasses("org.jfree.chart");
+		e.analyseClasses("javax.mail");
+		// e.analyseClasses("javax.xml");
+		e.analyseClasses("org.jfree.chart");
 		// e.analyseClasses("javax.swing");
 		JFrame frame = new JFrame();
 		DirectedPseudograph<String, Relation> graph = s.getGraph();
-//		RelationAnalyser.analiseGraph("javax.mail", graph);
-//		 RelationAnalyser.analiseGraph("javax.xml", graph);
-		 RelationAnalyser.analiseGraph("org.jfree.chart", graph);
+		RelationAnalyser.analiseGraph("javax.mail", graph);
+		// RelationAnalyser.analiseGraph("javax.xml", graph);
+		RelationAnalyser.analiseGraph("org.jfree.chart", graph);
 		// RelationAnalyser.analiseGraph("", graph);
 
-		System.out.println("Number of verticies before: " + graph.vertexSet().size());
-		graph.removeAllVertices(Arrays.asList(new String[] { "int", "void", "double", "boolean", "java.lang.String" }));
-		System.out.println("Number of verticies before: " + graph.vertexSet().size());
-		JGraphLayoutPanel layoutPanel = new JGraphLayoutPanel(graph);
-		frame.getContentPane().add(layoutPanel);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.pack();
-		frame.setSize(640, 520);
-		//frame.setVisible(true);
+		/*
+		 * JGraphLayoutPanel layoutPanel = new JGraphLayoutPanel(graph); frame.getContentPane().add(layoutPanel);
+		 * frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); frame.pack(); frame.setSize(640, 520); //frame.setVisible(true);
+		 */
 	}
 
 }

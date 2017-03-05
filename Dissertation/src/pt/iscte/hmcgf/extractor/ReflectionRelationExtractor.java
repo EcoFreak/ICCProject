@@ -21,6 +21,7 @@ import pt.iscte.hmcgf.extractor.relations.RelationStorage;
 
 public class ReflectionRelationExtractor implements RelationExtractor
 {
+	public static final String				NO_TYPE	= "NO_TYPE";
 	private RelationStorage					storage;
 	private Reflections						reflectionsInstance;
 	private Multimap<Class<?>, Class<?>>	storedSubTypes;
@@ -53,12 +54,21 @@ public class ReflectionRelationExtractor implements RelationExtractor
 		Constructor<?>[] constructors = c.getConstructors();
 		for (Constructor<?> constructor : constructors)
 		{
+			int numValidParamsFound = 0;
 			for (Class<?> paramType : constructor.getParameterTypes())
 			{
 				if (paramType.getCanonicalName().startsWith(wildcard))
 				{
+					numValidParamsFound++;
 					addConstructorRelationForAllSubTypes(paramType, c, c, constructor, convertParameterTypes(constructor.getParameterTypes()));
 				}
+			}
+			if (numValidParamsFound == 0)
+			{
+				// Constructor has no parameters or no API Types are used as parameters, create relationship for type NO_TYPE
+				storage.addRelation(
+						new Relation(wildcard + "." + NO_TYPE, normalizeType(c.getCanonicalName()), normalizeType(c.getCanonicalName()),
+								constructor.getName(), true, true, false, null, convertParameterTypes(constructor.getParameterTypes())));
 			}
 		}
 	}
@@ -68,16 +78,31 @@ public class ReflectionRelationExtractor implements RelationExtractor
 		Method[] methods = c.getMethods();
 		for (Method method : methods)
 		{
-			if (method.getDeclaringClass().equals(Object.class))
+			if (method.getDeclaringClass().equals(Object.class) || (!method.getReturnType().getCanonicalName().startsWith(wildcard)))
 				continue;
+			int numValidParamsFound = 0;
 			for (Class<?> paramType : method.getParameterTypes())
 			{
 				if (paramType.getCanonicalName().startsWith(wildcard))
 				{
+					numValidParamsFound++;
 					addMethodRelationForAllSubTypes(paramType, c, method.getReturnType(), method, convertParameterTypes(method.getParameterTypes()));
 				}
 			}
+			if (numValidParamsFound == 0)
+			{
+				// Method has no parameters or no API Types are used as parameters, create relationship for type NO_TYPE
+				storage.addRelation(
+						new Relation(wildcard + "." + NO_TYPE, normalizeType(method.getReturnType().getCanonicalName()),
+								normalizeType(c.getCanonicalName()),
+								method.getName(), Modifier.isStatic(method.getModifiers()), false, false, null,
+								convertParameterTypes(method.getParameterTypes())));
+			}
 		}
+	}
+	private String normalizeType(String canonicalName)
+	{
+		return canonicalName.replaceAll("\\[\\]", "");
 	}
 	private Collection<String> convertParameterTypes(Class<?>[] params)
 	{
@@ -91,28 +116,28 @@ public class ReflectionRelationExtractor implements RelationExtractor
 	private void addMethodRelationForAllSubTypes(Class<?> from, Class<?> intermidiary, Class<?> to, Method method, Collection<String> parameters)
 	{
 		storage.addRelation(
-				new Relation(from.getCanonicalName(), to.getCanonicalName(), intermidiary.getCanonicalName(), method.getName(),
-						Modifier.isStatic(method.getModifiers()), false, false, null, parameters));
-//		for (Class<?> subType : getSubTypesOfClass(from))
-//		{
-//			storage.addRelation(
-//					new Relation(subType.getCanonicalName(), to.getCanonicalName(), intermidiary.getCanonicalName(), method.getName(),
-//							Modifier.isStatic(method.getModifiers()), false, true, from.getCanonicalName(), parameters));
-//		}
+				new Relation(normalizeType(from.getCanonicalName()), normalizeType(to.getCanonicalName()), intermidiary.getCanonicalName(),
+						method.getName(), Modifier.isStatic(method.getModifiers()), false, false, null, parameters));
+		for (Class<?> subType : getSubTypesOfClass(from))
+		{
+			storage.addRelation(
+					new Relation(normalizeType(subType.getCanonicalName()), normalizeType(to.getCanonicalName()), intermidiary.getCanonicalName(),
+							method.getName(), Modifier.isStatic(method.getModifiers()), false, true, from.getCanonicalName(), parameters));
+		}
 
 	}
 	private void addConstructorRelationForAllSubTypes(Class<?> from, Class<?> intermidiary, Class<?> to, Constructor<?> constructor,
 			Collection<String> parameters)
 	{
 		storage.addRelation(
-				new Relation(from.getCanonicalName(), to.getCanonicalName(), intermidiary.getCanonicalName(), constructor.getName(),
-						Modifier.isStatic(constructor.getModifiers()), true, false, null, parameters));
-//		for (Class<?> subType : getSubTypesOfClass(from))
-//		{
-//			storage.addRelation(
-//					new Relation(subType.getCanonicalName(), to.getCanonicalName(), intermidiary.getCanonicalName(), constructor.getName(),
-//							Modifier.isStatic(constructor.getModifiers()), true, true, from.getCanonicalName(), parameters));
-//		}
+				new Relation(normalizeType(from.getCanonicalName()), normalizeType(to.getCanonicalName()), intermidiary.getCanonicalName(),
+						constructor.getName(), Modifier.isStatic(constructor.getModifiers()), true, false, null, parameters));
+		for (Class<?> subType : getSubTypesOfClass(from))
+		{
+			storage.addRelation(
+					new Relation(normalizeType(subType.getCanonicalName()), normalizeType(to.getCanonicalName()), intermidiary.getCanonicalName(),
+							constructor.getName(), Modifier.isStatic(constructor.getModifiers()), true, true, from.getCanonicalName(), parameters));
+		}
 
 	}
 	private Collection<Class<?>> getSubTypesOfClass(Class<?> c)
