@@ -132,4 +132,17 @@ public class Relation
 				&& methodName.equals(r.methodName)
 				&& parameters.equals(r.parameters) && isStatic == r.isStatic && isConstructor == r.isConstructor;
 	}
+	
+	
+	public double calculateCost()
+	{
+		double cost = 1.0;
+		//include all parameters
+		//TODO EXCLUDE basic tipes and remove duplicates
+		cost += parameters.size();
+		// account for the instance if it's required
+		if(!isStatic && !isConstructor)
+			cost ++;
+		return cost;
+	}
 }
