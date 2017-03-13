@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.reflections.scanners.SubTypesScanner;
@@ -44,6 +45,7 @@ public class ReflectionRelationExtractor implements RelationExtractor
 			}
 			catch (NoClassDefFoundError e)
 			{
+				System.err.println(e);
 				// SUPRESS WARNING WITH NOCLASSDEF ERRORS
 			}
 		}
@@ -152,13 +154,19 @@ public class ReflectionRelationExtractor implements RelationExtractor
 		List<ClassLoader> classLoadersList = new LinkedList<ClassLoader>();
 		classLoadersList.add(ClasspathHelper.contextClassLoader());
 		classLoadersList.add(ClasspathHelper.staticClassLoader());
+		classLoadersList.add(ClassLoader.getSystemClassLoader());
 
 		Reflections reflections = new Reflections(new ConfigurationBuilder()
-				.setScanners(new SubTypesScanner(false /* don't exclude Object.class */), new ResourcesScanner())
+				.setScanners(new SubTypesScanner(false).filterResultsBy(
+						new FilterBuilder().include(Object.class.getName())),
+						new ResourcesScanner())
+				// .setUrls(ClasspathHelper.forPackage(wildcard))
 				.setUrls(ClasspathHelper.forClassLoader(classLoadersList.toArray(new ClassLoader[0])))
-				.filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix(wildcard))));
+				.filterInputsBy(new FilterBuilder().includePackage(wildcard)));
+		// .filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix(wildcard))));
 
 		classes = reflections.getSubTypesOf(Object.class);
+		System.out.println(wildcard + ": Found " + classes.size() + " types");
 		return classes;
 	}
 	@Override

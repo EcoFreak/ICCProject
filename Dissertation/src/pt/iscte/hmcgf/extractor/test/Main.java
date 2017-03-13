@@ -16,15 +16,18 @@ public class Main
 		GraphRelationStorage s = new GraphRelationStorage();
 		ReflectionRelationExtractor e = new ReflectionRelationExtractor(s);
 		// e.analyseClasses("pt.iscte.hmcgf.extractor.test.dummy");
-		//e.analyseClasses("javax.mail");
-		// e.analyseClasses("javax.xml");
+		e.analyseClasses("javax.mail");
+//		e.analyseClasses("javax.xml");
+		e.analyseClasses("javax.swing");
+		e.analyseClasses("java");
 		e.analyseClasses("org.jfree.chart");
 		// e.analyseClasses("javax.swing");
 		JFrame frame = new JFrame();
 		DirectedPseudograph<String, Relation> graph = s.getGraph();
-		//RelationAnalyser.analiseGraph("javax.mail", graph);
+		// RelationAnalyser.analiseGraph("javax.mail", graph);
 		// RelationAnalyser.analiseGraph("javax.xml", graph);
-		RelationAnalyser.analiseGraph("org.jfree.chart", graph);
+		RelationAnalyser.analiseGraph("javax.swing", graph);
+		// RelationAnalyser.analiseGraph("org.jfree.chart", graph);
 		// RelationAnalyser.analiseGraph("", graph);
 
 		/*
