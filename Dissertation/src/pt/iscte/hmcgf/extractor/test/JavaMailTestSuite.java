@@ -12,6 +12,7 @@ import pt.iscte.hmcgf.extractor.ReflectionRelationExtractor;
 import pt.iscte.hmcgf.extractor.relations.GraphRelationStorage;
 import pt.iscte.hmcgf.extractor.relations.Relation;
 import pt.iscte.hmcgf.extractor.relations.RelationStorage;
+import pt.iscte.hmcgf.extractor.relations.Relation.RelationType;
 
 public class JavaMailTestSuite
 {
@@ -56,9 +57,9 @@ public class JavaMailTestSuite
 		for (Relation relation : relationsForType)
 		{
 			if (relation.getDestination().equals(MIME_MESSAGE) &&
-					relation.isConstructor() &&
+					relation.getRelationType().equals(RelationType.PARAM_IN_CONSTRUCTOR) &&
 					relation.getIntermediary().equals(MIME_MESSAGE) &&
-					relation.getNumParameters() == 1)
+					relation.getNumInternalParameters() == 1)
 			{
 				found = true;
 				break;
@@ -84,10 +85,10 @@ public class JavaMailTestSuite
 		{
 			System.out.println(relation.getMethodName());
 			if (relation.getDestination().equals("void") &&
-					relation.IsStatic() &&
+					relation.getRelationType().equals(RelationType.PARAM_IN_STATIC_METHOD) &&
 					relation.getIntermediary().equals(TRANSPORT) &&
 					relation.getMethodName().equals("send") &&
-					relation.getNumParameters() == 1)
+					relation.getNumInternalParameters() == 1)
 			{
 				found = true;
 				break;

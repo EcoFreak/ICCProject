@@ -3,55 +3,76 @@ package pt.iscte.hmcgf.extractor.relations;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class Relation
+public abstract class Relation
 {
-	private String				source;
-	private String				intermediary;
-	private String				destination;
-	private String				methodName;
+	protected String				source;
+	protected String				intermediary;
+	protected String				destination;
+	protected String				methodName;
 	/**
 	 * mainType only used for subtype relation
 	 */
-	private String				mainType;
-	private Collection<String>	parameters;
-	private boolean				isStatic;
-	private boolean				isConstructor;
-	private boolean				requiresCast;
+	protected String				mainType;
+	protected Collection<String>	internalParameters;
+	protected Collection<String>	allParameters;
+	protected boolean				requiresCast;
 
 	public Relation(String source, String destination, String intermediary,
-			String methodName, boolean isStatic, boolean isConstructor,
-			boolean requiresCast, String mainType, Collection<String> parameters)
+			String methodName, boolean requiresCast, String mainType,
+			Collection<String> internalParameters, Collection<String> allParameters)
 	{
-		this.source = source;
-		this.destination = destination;
-		this.intermediary = intermediary;
-		this.isStatic = isStatic;
+		setSource(source);
+		setDestination(destination);
+		setintermediary(intermediary);
 		this.methodName = methodName;
-		this.isConstructor = isConstructor;
 		this.requiresCast = requiresCast;
-		this.parameters = new ArrayList<String>(parameters);
+		this.internalParameters = new ArrayList<String>(internalParameters);
+		this.allParameters = new ArrayList<String>(allParameters);
 		this.mainType = mainType;
+	}
+
+	public abstract boolean isStatic();
+	public abstract RelationType getRelationType();
+	public abstract String toString();
+
+	public void setSource(String source)
+	{
+		this.source = source.replaceAll("\\[\\]", "");
+	}
+
+	public void setDestination(String destination)
+	{
+		this.destination = destination.replaceAll("\\[\\]", "");
+	}
+
+	public void setintermediary(String intermediary)
+	{
+		this.intermediary = intermediary.replaceAll("\\[\\]", "");
 	}
 
 	public String getMethodName()
 	{
 		return this.methodName;
 	}
-	public boolean isConstructor()
-	{
-		return isConstructor;
-	}
 	public boolean requiresCast()
 	{
 		return this.requiresCast;
 	}
-	public Collection<String> getParamenters()
+	public Collection<String> getInternalParamenters()
 	{
-		return parameters;
+		return internalParameters;
 	}
-	public int getNumParameters()
+	public Collection<String> getAllParamenters()
 	{
-		return parameters.size();
+		return allParameters;
+	}
+	public int getNumInternalParameters()
+	{
+		return internalParameters.size();
+	}
+	public int getNumAllParameters()
+	{
+		return allParameters.size();
 	}
 	public String getSource()
 	{
@@ -85,10 +106,6 @@ public class Relation
 	{
 		return this.destination.substring(this.destination.lastIndexOf(".") + 1);
 	}
-	public boolean IsStatic()
-	{
-		return isStatic;
-	}
 
 	@Override
 	public int hashCode()
@@ -108,17 +125,6 @@ public class Relation
 				&& requiresCast == r.requiresCast && source.equals(r.source);
 	}
 
-	@Override
-	public String toString()
-	{
-		String parameters = ", " + getNumParameters() + ((getNumParameters() > 1) ? " parameters" : " parameter");
-		if (isConstructor())
-			return "new " + getDestinationName() + "( " + getSourceName() + parameters + " )";
-		if (IsStatic())
-			return "static " + getIntermediaryName() + "." + getMethodName() + "( " + getSourceName() + parameters + " )";
-		return "( instance of " + getIntermediaryName() + ")." + methodName + "( " + getSourceName() + parameters + " )";
-
-	}
 	/**
 	 * Checks if two relations are equal or equivalent (equal except in the source type)
 	 * 
@@ -130,19 +136,13 @@ public class Relation
 	{
 		return destination.equals(r.destination) && intermediary.equals(r.intermediary)
 				&& methodName.equals(r.methodName)
-				&& parameters.equals(r.parameters) && isStatic == r.isStatic && isConstructor == r.isConstructor;
+				&& internalParameters.equals(r.internalParameters);
 	}
-	
-	
-	public double calculateCost()
+
+	public abstract double calculateCost();
+
+	public enum RelationType
 	{
-		double cost = 1.0;
-		//include all parameters
-		//TODO EXCLUDE basic tipes and remove duplicates
-		cost += parameters.size();
-		// account for the instance if it's required
-		if(!isStatic && !isConstructor)
-			cost ++;
-		return cost;
+		PARAM_IN_STATIC_METHOD, PARAM_IN_INSTANCE_METHOD, INSTANCE_IN_INSTANCE_METHOD, PARAM_IN_CONSTRUCTOR, EXTERNAL
 	}
 }

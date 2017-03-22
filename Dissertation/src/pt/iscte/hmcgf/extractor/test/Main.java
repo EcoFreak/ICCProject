@@ -1,7 +1,5 @@
 package pt.iscte.hmcgf.extractor.test;
 
-import java.util.Arrays;
-import javax.swing.JFrame;
 import org.jgrapht.graph.DirectedPseudograph;
 import pt.iscte.hmcgf.extractor.ReflectionRelationExtractor;
 import pt.iscte.hmcgf.extractor.RelationAnalyser;
@@ -19,18 +17,17 @@ public class Main
 		e.analyseClasses("javax.mail");
 //		e.analyseClasses("javax.xml");
 		e.analyseClasses("javax.swing");
-		e.analyseClasses("java");
 		e.analyseClasses("org.jfree.chart");
 		// e.analyseClasses("javax.swing");
-		JFrame frame = new JFrame();
 		DirectedPseudograph<String, Relation> graph = s.getGraph();
-		// RelationAnalyser.analiseGraph("javax.mail", graph);
-		// RelationAnalyser.analiseGraph("javax.xml", graph);
-		RelationAnalyser.analiseGraph("javax.swing", graph);
-		// RelationAnalyser.analiseGraph("org.jfree.chart", graph);
+		RelationAnalyser.analiseGraph("javax.mail", graph);
+		//RelationAnalyser.analiseGraph("javax.xml", graph);
+		RelationAnalyser.analiseGraph("pt.iscte.hmcgf.extractor.test.dummy", graph);
+		RelationAnalyser.analiseGraph("org.jfree.chart", graph);
 		// RelationAnalyser.analiseGraph("", graph);
 
 		/*
+		 * JFrame frame = new JFrame();
 		 * JGraphLayoutPanel layoutPanel = new JGraphLayoutPanel(graph); frame.getContentPane().add(layoutPanel);
 		 * frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); frame.pack(); frame.setSize(640, 520); //frame.setVisible(true);
 		 */

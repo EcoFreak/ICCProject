@@ -10,6 +10,7 @@ import pt.iscte.hmcgf.extractor.ReflectionRelationExtractor;
 import pt.iscte.hmcgf.extractor.relations.GraphRelationStorage;
 import pt.iscte.hmcgf.extractor.relations.Relation;
 import pt.iscte.hmcgf.extractor.relations.RelationStorage;
+import pt.iscte.hmcgf.extractor.relations.Relation.RelationType;
 
 public class DummyTestSuite
 {
@@ -45,7 +46,7 @@ public class DummyTestSuite
 		assertTrue(relationsForC.size() > 0);
 		for (Relation relation : relationsForC)
 		{
-			if (relation.IsStatic()
+			if (relation.getRelationType().equals(RelationType.PARAM_IN_STATIC_METHOD)
 					&& relation.getIntermediary().equals(relation.getSource())
 					&& relation.getIntermediary().equals(C)
 					&& relation.getDestination().equals(B))
@@ -62,7 +63,7 @@ public class DummyTestSuite
 		assertTrue(relationForA.size() > 0);
 		for (Relation relation : relationForA)
 		{
-			if (relation.IsStatic()
+			if (relation.getRelationType().equals(RelationType.PARAM_IN_STATIC_METHOD)
 					&& !relation.getIntermediary().equals(relation.getSource())
 					&& relation.getIntermediary().equals(B)
 					&& relation.getDestination().equals(C)
@@ -79,9 +80,9 @@ public class DummyTestSuite
 		for (Relation r : graph.getAllRelations())
 		{
 			if (r.requiresCast())
-				assertTrue(r.getParamenters().contains(r.getMainType()));
-			else
-				assertTrue(r.getParamenters().contains(r.getSource()));
+				assertTrue(r.getInternalParamenters().contains(r.getMainType()));
+			else if (r.getInternalParamenters().size() > 0)
+				assertTrue(r.getInternalParamenters().contains(r.getSource()));
 		}
 	}
 	@Test
@@ -98,7 +99,7 @@ public class DummyTestSuite
 	{
 		for (Relation r : graph.getAllRelations())
 		{
-			if (r.getNumParameters() == 0)
+			if (r.getNumInternalParameters() == 0 && !r.getSource().endsWith(ReflectionRelationExtractor.NO_TYPE))
 				fail("Relation without any parameters");
 		}
 	}
@@ -184,7 +185,7 @@ public class DummyTestSuite
 		int count = 0;
 		for (Relation r : graph.getAllRelations())
 		{
-			if (r.isConstructor())
+			if (r.getRelationType().equals(RelationType.PARAM_IN_CONSTRUCTOR))
 				count++;
 		}
 		assertTrue(count > 0);
@@ -195,7 +196,7 @@ public class DummyTestSuite
 	{
 		for (Relation r : graph.getAllRelations())
 		{
-			if (r.isConstructor() && r.IsStatic())
+			if (r.getRelationType().equals(RelationType.PARAM_IN_CONSTRUCTOR) && r.getRelationType().equals(RelationType.PARAM_IN_STATIC_METHOD))
 				fail("Found one static constructor");
 		}
 	}
