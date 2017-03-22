@@ -79,7 +79,7 @@ public class DummyTestSuite
 	{
 		for (Relation r : graph.getAllRelations())
 		{
-			if (r.requiresCast())
+			if (r.isImplicit())
 				assertTrue(r.getInternalParamenters().contains(r.getMainType()));
 			else if (r.getInternalParamenters().size() > 0)
 				assertTrue(r.getInternalParamenters().contains(r.getSource()));
@@ -110,7 +110,7 @@ public class DummyTestSuite
 		int count = 0;
 		for (Relation r : graph.getAllRelations())
 		{
-			if (r.requiresCast())
+			if (r.isImplicit())
 				count++;
 		}
 		assertTrue(count > 0);
@@ -123,7 +123,7 @@ public class DummyTestSuite
 			assertNotNull(r.getSource());
 			assertNotNull(r.getIntermediary());
 			assertNotNull(r.getDestination());
-			if (r.requiresCast())
+			if (r.isImplicit())
 				assertNotNull(r.getMainType());
 		}
 	}
@@ -133,7 +133,7 @@ public class DummyTestSuite
 		int count = 0;
 		for (Relation r : graph.getAllRelations())
 		{
-			if (r.requiresCast())
+			if (r.isImplicit())
 			{
 				assertNotNull(r.getMainType());
 				Collection<Relation> relationsForMainType = graph.getRelationsForType(r.getMainType());

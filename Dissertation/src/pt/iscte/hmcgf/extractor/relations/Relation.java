@@ -15,17 +15,17 @@ public abstract class Relation
 	protected String				mainType;
 	protected Collection<String>	internalParameters;
 	protected Collection<String>	allParameters;
-	protected boolean				requiresCast;
+	protected boolean				isImplicit;
 
 	public Relation(String source, String destination, String intermediary,
-			String methodName, boolean requiresCast, String mainType,
+			String methodName, boolean isImplicit, String mainType,
 			Collection<String> internalParameters, Collection<String> allParameters)
 	{
 		setSource(source);
 		setDestination(destination);
 		setintermediary(intermediary);
 		this.methodName = methodName;
-		this.requiresCast = requiresCast;
+		this.isImplicit = isImplicit;
 		this.internalParameters = new ArrayList<String>(internalParameters);
 		this.allParameters = new ArrayList<String>(allParameters);
 		this.mainType = mainType;
@@ -54,9 +54,9 @@ public abstract class Relation
 	{
 		return this.methodName;
 	}
-	public boolean requiresCast()
+	public boolean isImplicit()
 	{
-		return this.requiresCast;
+		return this.isImplicit;
 	}
 	public Collection<String> getInternalParamenters()
 	{
@@ -122,7 +122,7 @@ public abstract class Relation
 		Relation r = (Relation) obj;
 		return isEquivalent(r)
 				&& ((mainType == null && r.mainType == null) || (mainType != null && mainType.equals(r.mainType)))
-				&& requiresCast == r.requiresCast && source.equals(r.source);
+				&& isImplicit == r.isImplicit && source.equals(r.source);
 	}
 
 	/**

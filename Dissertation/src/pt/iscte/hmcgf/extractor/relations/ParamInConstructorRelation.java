@@ -5,10 +5,10 @@ import java.util.Collection;
 public class ParamInConstructorRelation extends Relation
 {
 
-	public ParamInConstructorRelation(String source, String destination, boolean requiresCast, String mainType,
+	public ParamInConstructorRelation(String source, String destination, boolean isImplicit, String mainType,
 			Collection<String> internalParameters, Collection<String> allParameters)
 	{
-		super(source, destination, destination, destination, requiresCast, mainType, internalParameters, allParameters);
+		super(source, destination, destination, destination, isImplicit, mainType, internalParameters, allParameters);
 	}
 
 	@Override

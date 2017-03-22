@@ -5,10 +5,10 @@ import java.util.Collection;
 public class ParamInInstanceMethodRelation extends Relation
 {
 
-	public ParamInInstanceMethodRelation(String source, String destination, String intermediary, String methodName, boolean requiresCast, String mainType,
+	public ParamInInstanceMethodRelation(String source, String destination, String intermediary, String methodName, boolean isImplicit, String mainType,
 			Collection<String> internalParameters, Collection<String> allParameters)
 	{
-		super(source, destination, intermediary, methodName, requiresCast, mainType, internalParameters, allParameters);
+		super(source, destination, intermediary, methodName, isImplicit, mainType, internalParameters, allParameters);
 	}
 
 	@Override

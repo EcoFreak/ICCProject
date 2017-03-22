@@ -6,9 +6,9 @@ public class ParamInStaticMethodRelation extends Relation
 {
 
 	public ParamInStaticMethodRelation(String source, String destination, String intermediary, String methodName,
-			boolean requiresCast, String mainType, Collection<String> internalParameters, Collection<String> allParameters)
+			boolean isImplicit, String mainType, Collection<String> internalParameters, Collection<String> allParameters)
 	{
-		super(source, destination, intermediary, methodName, requiresCast, mainType, internalParameters, allParameters);
+		super(source, destination, intermediary, methodName, isImplicit, mainType, internalParameters, allParameters);
 	}
 
 	@Override
