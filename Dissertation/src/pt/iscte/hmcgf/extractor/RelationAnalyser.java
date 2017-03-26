@@ -155,7 +155,7 @@ public class RelationAnalyser {
 				cell = row.createCell(cellnum++);
 			}
 		}
-		sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 7));
+		sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 9));
 		sheet.autoSizeColumn(0);
 		sheet.autoSizeColumn(1);
 		sheet.autoSizeColumn(2);
@@ -165,6 +165,8 @@ public class RelationAnalyser {
 		sheet.autoSizeColumn(6);
 		sheet.autoSizeColumn(7);
 		sheet.autoSizeColumn(8);
+		sheet.autoSizeColumn(9);
+		sheet.autoSizeColumn(10);
 	}
 
 	private static boolean containsMethodByName(Method[] methods, String name) {

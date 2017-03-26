@@ -12,9 +12,9 @@ public class Main {
 		GraphRelationStorage s = new GraphRelationStorage();
 		ReflectionRelationExtractor e = new ReflectionRelationExtractor(s);
 		// e.analyseClasses("pt.iscte.hmcgf.extractor.test.dummy");
-		// e.analyseClasses("javax.mail");
+		e.analyseClasses("javax.mail");
 		// e.analyseClasses("javax.xml");
-		// e.analyseClasses("javax.swing");
+		e.analyseClasses("javax.swing");
 		e.analyseClasses("org.jfree.chart");
 		// e.analyseClasses("javax.swing");
 		DirectedPseudograph<String, Relation> graph = s.getGraph();

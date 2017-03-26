@@ -166,20 +166,21 @@ public class ReflectionRelationExtractor implements RelationExtractor {
 
 		}
 
-		for (Class<?> subType : getSubTypesOfClass(from)) {
-			if (Modifier.isStatic(method.getModifiers()))
-				storage.addRelation(new ParamInStaticMethodRelation(from.getCanonicalName(), to.getCanonicalName(),
-						intermidiary.getCanonicalName(), method.getName(), true, from.getCanonicalName(), parameters,
-						allParameters));
-			else {
-				storage.addRelation(new ParamInInstanceMethodRelation(from.getCanonicalName(), to.getCanonicalName(),
-						intermidiary.getCanonicalName(), method.getName(), true, from.getCanonicalName(), parameters,
-						allParameters));
-				storage.addRelation(new InstanceInInstanceMethodRelation(intermidiary.getCanonicalName(),
-						to.getCanonicalName(), intermidiary.getCanonicalName(), method.getName(), true,
-						from.getCanonicalName(), parameters, allParameters));
-			}
-		}
+		//TODO COMMENTED SUBTYPES EXPLORATION
+//		for (Class<?> subType : getSubTypesOfClass(from)) {
+//			if (Modifier.isStatic(method.getModifiers()))
+//				storage.addRelation(new ParamInStaticMethodRelation(subType.getCanonicalName(), to.getCanonicalName(),
+//						intermidiary.getCanonicalName(), method.getName(), true, from.getCanonicalName(), parameters,
+//						allParameters));
+//			else {
+//				storage.addRelation(new ParamInInstanceMethodRelation(subType.getCanonicalName(), to.getCanonicalName(),
+//						intermidiary.getCanonicalName(), method.getName(), true, from.getCanonicalName(), parameters,
+//						allParameters));
+//				storage.addRelation(new InstanceInInstanceMethodRelation(intermidiary.getCanonicalName(),
+//						to.getCanonicalName(), intermidiary.getCanonicalName(), method.getName(), true,
+//						from.getCanonicalName(), parameters, allParameters));
+//			}
+//		}
 
 	}
 
@@ -187,10 +188,11 @@ public class ReflectionRelationExtractor implements RelationExtractor {
 			Constructor<?> constructor, Collection<String> parameters, Collection<String> allParameters) {
 		storage.addRelation(new ParamInConstructorRelation(from.getCanonicalName(), to.getCanonicalName(), false, null,
 				parameters, allParameters));
-		for (Class<?> subType : getSubTypesOfClass(from)) {
-			storage.addRelation(new ParamInConstructorRelation(from.getCanonicalName(), to.getCanonicalName(), true,
-					from.getCanonicalName(), parameters, allParameters));
-		}
+		//TODO COMMENTED SUBTYPES EXPLORATION
+//		for (Class<?> subType : getSubTypesOfClass(from)) {
+//			storage.addRelation(new ParamInConstructorRelation(subType.getCanonicalName(), to.getCanonicalName(), true,
+//					from.getCanonicalName(), parameters, allParameters));
+//		}
 
 	}
 
