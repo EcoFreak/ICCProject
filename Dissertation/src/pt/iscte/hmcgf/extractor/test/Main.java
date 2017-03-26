@@ -2,6 +2,7 @@ package pt.iscte.hmcgf.extractor.test;
 
 import java.awt.Panel;
 import org.jgrapht.graph.DirectedPseudograph;
+import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import pt.iscte.hmcgf.extractor.ReflectionRelationExtractor;
 import pt.iscte.hmcgf.extractor.RelationAnalyser;
 import pt.iscte.hmcgf.extractor.relations.GraphRelationStorage;
@@ -13,10 +14,15 @@ public class Main
 
 	public static void main(String[] args)
 	{
+		System.out.println(new FastClasspathScanner("!",Panel.class.getPackage().getName()).scan().getNamesOfAllClasses().size());
+
+		System.out.println(new FastClasspathScanner("!!").scan().getNamesOfAllStandardClasses().contains("java.lang.String"));
+		System.out.println(new FastClasspathScanner("!!","org.eclipse.swt").scan().getNamesOfAllStandardClasses().size());
+		System.out.println(new FastClasspathScanner().scan().getNamesOfAllStandardClasses().size());
 		GraphRelationStorage s = new GraphRelationStorage();
 		ReflectionRelationExtractor e = new ReflectionRelationExtractor(s);
 		// e.analyseClasses("pt.iscte.hmcgf.extractor.test.dummy");
-		//e.analyseClasses("javax.mail", false);
+		// e.analyseClasses("javax.mail", false);
 		// e.analyseClasses("javax.xml");
 		e.analyseClasses("org.eclipse.swt", false);
 		e.analyseClasses("javax.swing", false);

@@ -17,6 +17,7 @@ import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import pt.iscte.hmcgf.extractor.relations.InstanceInInstanceMethodRelation;
 import pt.iscte.hmcgf.extractor.relations.ParamInConstructorRelation;
 import pt.iscte.hmcgf.extractor.relations.ParamInInstanceMethodRelation;
@@ -272,6 +273,7 @@ public class ReflectionRelationExtractor implements RelationExtractor
 				.setUrls(ClasspathHelper.forClassLoader(classLoadersList.toArray(new ClassLoader[0])))
 				.filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix(namespace))));
 
+		//new FastClasspathScanner("!!","org.eclipse.swt").scan().getNamesOfAllStandardClasses()
 		classes = reflections.getSubTypesOf(Object.class);
 		System.out.println(namespace + ": Found " + classes.size() + " types");
 		return classes;
