@@ -5,10 +5,10 @@ import java.util.Collection;
 public class ParamInStaticMethodRelation extends Relation
 {
 
-	public ParamInStaticMethodRelation(String source, String destination, String intermediary, String methodName,
-			boolean isImplicit, String mainType, Collection<String> internalParameters, Collection<String> allParameters)
+	public ParamInStaticMethodRelation(Type source, Type destination, Type intermediary, String methodName,
+			boolean isImplicit, Type mainType, Collection<Type> allParameters)
 	{
-		super(source, destination, intermediary, methodName, isImplicit, mainType, internalParameters, allParameters);
+		super(source, destination, intermediary, methodName, isImplicit, mainType, allParameters);
 	}
 
 	@Override
@@ -26,7 +26,7 @@ public class ParamInStaticMethodRelation extends Relation
 	@Override
 	public double calculateCost()
 	{
-		return 1.0 + this.internalParameters.size();
+		return 1.0 + this.getNumInternalParameters();
 	}
 
 	@Override

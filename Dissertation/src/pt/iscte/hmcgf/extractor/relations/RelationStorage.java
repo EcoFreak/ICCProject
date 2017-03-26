@@ -18,7 +18,22 @@ public interface RelationStorage
 	 * @param type
 	 * @return
 	 */
-	public Collection<Relation> getRelationsForType(String type);
+	public Collection<Relation> getRelationsForType(Type type);
+	/**
+	 * Returns all relations found for given type canonical name
+	 * 
+	 * @param type
+	 * @return
+	 */
+	public Collection<Relation> getRelationsForString(String type);
+
+	/***
+	 * Get Type from String canonical name
+	 * 
+	 * @param canonicalName
+	 * @return
+	 */
+	public Type getTypeByCanonicalName(String canonicalName);
 
 	/**
 	 * Returns number of types stored
@@ -39,7 +54,7 @@ public interface RelationStorage
 	 * 
 	 * @return collection of String (Type)
 	 */
-	public Collection<String> getAllTypes();
+	public Collection<Type> getAllTypes();
 
 	/**
 	 * Returns a collection with all stored relations

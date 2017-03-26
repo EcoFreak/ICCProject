@@ -5,10 +5,11 @@ import java.util.Collection;
 public class ParamInConstructorRelation extends Relation
 {
 
-	public ParamInConstructorRelation(String source, String destination, boolean isImplicit, String mainType,
-			Collection<String> internalParameters, Collection<String> allParameters)
+	public ParamInConstructorRelation(Type source, Type destination, boolean isImplicit, Type mainType,
+			Collection<Type> allParameters)
 	{
-		super(source, destination, destination, destination, isImplicit, mainType, internalParameters, allParameters);
+		// name of method is the name of the class
+		super(source, destination, destination, destination.getName(), isImplicit, mainType, allParameters);
 	}
 
 	@Override
@@ -32,7 +33,7 @@ public class ParamInConstructorRelation extends Relation
 	@Override
 	public double calculateCost()
 	{
-		return 1 + internalParameters.size();
+		return 1 + getNumInternalParameters();
 	}
 
 }

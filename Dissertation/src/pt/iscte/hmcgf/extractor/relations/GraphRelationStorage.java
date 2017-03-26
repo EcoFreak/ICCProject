@@ -6,12 +6,12 @@ import org.jgrapht.graph.DirectedPseudograph;
 
 public class GraphRelationStorage implements RelationStorage
 {
-	private DirectedPseudograph<String, Relation> graph;
+	private DirectedPseudograph<Type, Relation> graph;
 	public GraphRelationStorage()
 	{
-		graph = new DirectedPseudograph<String, Relation>(Relation.class);
+		graph = new DirectedPseudograph<Type, Relation>(Relation.class);
 	}
-	private void prep(String s, String d)
+	private void prep(Type s, Type d)
 	{
 		if (!graph.containsVertex(s))
 			graph.addVertex(s);
@@ -29,14 +29,14 @@ public class GraphRelationStorage implements RelationStorage
 	}
 
 	@Override
-	public Collection<Relation> getRelationsForType(String type)
+	public Collection<Relation> getRelationsForType(Type type)
 	{
 		if (graph.containsVertex(type))
 			return graph.outgoingEdgesOf(type);
 		return new ArrayList<Relation>();
 	}
 	// TODO REMOVE TEMPORARY METHOD
-	public DirectedPseudograph<String, Relation> getGraph()
+	public DirectedPseudograph<Type, Relation> getGraph()
 	{
 		return graph;
 	}
@@ -51,7 +51,7 @@ public class GraphRelationStorage implements RelationStorage
 		return graph.edgeSet().size();
 	}
 	@Override
-	public Collection<String> getAllTypes()
+	public Collection<Type> getAllTypes()
 	{
 		return this.graph.vertexSet();
 	}
@@ -59,6 +59,24 @@ public class GraphRelationStorage implements RelationStorage
 	public Collection<Relation> getAllRelations()
 	{
 		return this.graph.edgeSet();
+	}
+	@Override
+	public Collection<Relation> getRelationsForString(String name)
+	{
+		Type t = getTypeByCanonicalName(name);
+		if (t == null)
+			return new ArrayList<Relation>();
+		return getRelationsForType(t);
+	}
+	@Override
+	public Type getTypeByCanonicalName(String canonicalName)
+	{
+		for (Type t : getAllTypes())
+		{
+			if (t.getCanonicalName().equals(canonicalName))
+				return t;
+		}
+		return null;
 	}
 
 }

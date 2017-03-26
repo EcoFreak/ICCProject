@@ -10,6 +10,7 @@ import pt.iscte.hmcgf.extractor.ReflectionRelationExtractor;
 import pt.iscte.hmcgf.extractor.relations.GraphRelationStorage;
 import pt.iscte.hmcgf.extractor.relations.Relation;
 import pt.iscte.hmcgf.extractor.relations.RelationStorage;
+import pt.iscte.hmcgf.extractor.relations.Type;
 import pt.iscte.hmcgf.extractor.relations.Relation.RelationType;
 
 public class DummyTestSuite
@@ -25,9 +26,23 @@ public class DummyTestSuite
 	{
 		graph = new GraphRelationStorage();
 		ReflectionRelationExtractor e = new ReflectionRelationExtractor(graph);
-		e.analyseClasses("pt.iscte.hmcgf.extractor.test.dummy");
+		e.analyseClasses("pt.iscte.hmcgf.extractor.test.dummy", true);
 	}
 
+	@Test
+	public void testTypeExtraction()
+	{
+		assertNotNull(graph.getTypeByCanonicalName(A));
+		assertNotNull(graph.getTypeByCanonicalName(B));
+		assertNotNull(graph.getTypeByCanonicalName(C));
+		assertNotNull(graph.getTypeByCanonicalName(D));
+		assertNotNull(graph.getTypeByCanonicalName(Z));
+		assertTrue(graph.getTypeByCanonicalName(A).getCanonicalName().equals(A));
+		assertTrue(graph.getTypeByCanonicalName(B).getCanonicalName().equals(B));
+		assertTrue(graph.getTypeByCanonicalName(C).getCanonicalName().equals(C));
+		assertTrue(graph.getTypeByCanonicalName(D).getCanonicalName().equals(D));
+		assertTrue(graph.getTypeByCanonicalName(Z).getCanonicalName().equals(Z));
+	}
 	@Test
 	public void testNumberOfRelations()
 	{
@@ -41,15 +56,17 @@ public class DummyTestSuite
 	@Test
 	public void testDirectStaticRelation()
 	{
-		Collection<Relation> relationsForC = graph.getRelationsForType(C);
+		Type typeForC = graph.getTypeByCanonicalName(C);
+		Type typeForB = graph.getTypeByCanonicalName(B);
+		Collection<Relation> relationsForC = graph.getRelationsForType(typeForC);
 		boolean found = false;
 		assertTrue(relationsForC.size() > 0);
 		for (Relation relation : relationsForC)
 		{
 			if (relation.getRelationType().equals(RelationType.PARAM_IN_STATIC_METHOD)
 					&& relation.getIntermediary().equals(relation.getSource())
-					&& relation.getIntermediary().equals(C)
-					&& relation.getDestination().equals(B))
+					&& relation.getIntermediary().equals(typeForC)
+					&& relation.getDestination().equals(typeForB))
 				found = true;
 
 		}
@@ -58,16 +75,19 @@ public class DummyTestSuite
 	@Test
 	public void testIndirectStaticRelation()
 	{
-		Collection<Relation> relationForA = graph.getRelationsForType(A);
+		Type typeForA = graph.getTypeByCanonicalName(A);
+		Type typeForC = graph.getTypeByCanonicalName(C);
+		Type typeForB = graph.getTypeByCanonicalName(B);
+		Collection<Relation> relationForA = graph.getRelationsForType(typeForA);
 		boolean found = false;
 		assertTrue(relationForA.size() > 0);
 		for (Relation relation : relationForA)
 		{
 			if (relation.getRelationType().equals(RelationType.PARAM_IN_STATIC_METHOD)
 					&& !relation.getIntermediary().equals(relation.getSource())
-					&& relation.getIntermediary().equals(B)
-					&& relation.getDestination().equals(C)
-					&& relation.getSource().equals(A))
+					&& relation.getIntermediary().equals(typeForB)
+					&& relation.getDestination().equals(typeForC)
+					&& relation.getSource().equals(typeForA))
 				found = true;
 
 		}
@@ -80,9 +100,11 @@ public class DummyTestSuite
 		for (Relation r : graph.getAllRelations())
 		{
 			if (r.isImplicit())
-				assertTrue(r.getInternalParamenters().contains(r.getMainType()));
-			else if (r.getInternalParamenters().size() > 0)
-				assertTrue(r.getInternalParamenters().contains(r.getSource()));
+				assertTrue(r.getAllParamenters().contains(r.getMainType()));
+			else if (r.getAllParamenters().size() > 0
+					&& !r.getSource().getCanonicalName().endsWith(ReflectionRelationExtractor.NO_TYPE)
+					&& !r.getRelationType().equals(RelationType.INSTANCE_IN_INSTANCE_METHOD))
+				assertTrue(r.getAllParamenters().contains(r.getSource()));
 		}
 	}
 	@Test
@@ -91,16 +113,6 @@ public class DummyTestSuite
 		for (Relation r : graph.getAllRelations())
 		{
 			assertTrue(graph.getRelationsForType(r.getSource()).contains(r));
-		}
-	}
-
-	@Test
-	public void testParameterCount()
-	{
-		for (Relation r : graph.getAllRelations())
-		{
-			if (r.getNumInternalParameters() == 0 && !r.getSource().endsWith(ReflectionRelationExtractor.NO_TYPE))
-				fail("Relation without any parameters");
 		}
 	}
 
@@ -139,7 +151,7 @@ public class DummyTestSuite
 				Collection<Relation> relationsForMainType = graph.getRelationsForType(r.getMainType());
 				try
 				{
-					assertTrue(Class.forName(r.getMainType()).isAssignableFrom(Class.forName(r.getSource())));
+					assertTrue(Class.forName(r.getMainType().getCanonicalName()).isAssignableFrom(Class.forName(r.getSource().getCanonicalName())));
 					assertTrue(relationsForMainType.size() > 0);
 					for (Relation mainTypeRelation : relationsForMainType)
 					{
@@ -159,8 +171,8 @@ public class DummyTestSuite
 	@Test
 	public void testRelationSource()
 	{
-		Collection<String> allTypes = graph.getAllTypes();
-		for (String type : allTypes)
+		Collection<Type> allTypes = graph.getAllTypes();
+		for (Type type : allTypes)
 		{
 			Collection<Relation> relationsForType = graph.getRelationsForType(type);
 			for (Relation relation : relationsForType)
@@ -172,12 +184,16 @@ public class DummyTestSuite
 	@Test
 	public void testIfAllTypesExists()
 	{
-		Collection<String> allTypes = graph.getAllTypes();
+		Type typeForA = graph.getTypeByCanonicalName(A);
+		Type typeForB = graph.getTypeByCanonicalName(B);
+		Type typeForC = graph.getTypeByCanonicalName(C);
+		Type typeForD = graph.getTypeByCanonicalName(D);
+		Collection<Type> allTypes = graph.getAllTypes();
 		assertTrue(allTypes.size() > 0);
-		assertTrue(allTypes.contains(A));
-		assertTrue(allTypes.contains(B));
-		assertTrue(allTypes.contains(C));
-		assertTrue(allTypes.contains(D));
+		assertTrue(allTypes.contains(typeForA));
+		assertTrue(allTypes.contains(typeForB));
+		assertTrue(allTypes.contains(typeForC));
+		assertTrue(allTypes.contains(typeForD));
 	}
 	@Test
 	public void testConstructors()
@@ -205,6 +221,7 @@ public class DummyTestSuite
 	public void testInnerClassDetection()
 	{
 		System.out.println(graph.getAllTypes());
-		assertTrue(graph.getAllTypes().contains(Z));
+		Type typeForZ = graph.getTypeByCanonicalName(Z);
+		assertTrue(graph.getAllTypes().contains(typeForZ));
 	}
 }

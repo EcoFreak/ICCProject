@@ -5,29 +5,26 @@ import java.util.Collection;
 
 public abstract class Relation
 {
-	protected String				source;
-	protected String				intermediary;
-	protected String				destination;
-	protected String				methodName;
+	protected Type				source;
+	protected Type				intermediary;
+	protected Type				destination;
+	protected String			methodName;
 	/**
 	 * mainType only used for subtype relation
 	 */
-	protected String				mainType;
-	protected Collection<String>	internalParameters;
-	protected Collection<String>	allParameters;
-	protected boolean				isImplicit;
+	protected Type				mainType;
+	protected Collection<Type>	allParameters;
+	protected boolean			isImplicit;
 
-	public Relation(String source, String destination, String intermediary,
-			String methodName, boolean isImplicit, String mainType,
-			Collection<String> internalParameters, Collection<String> allParameters)
+	public Relation(Type source, Type destination, Type intermediary,
+			String methodName, boolean isImplicit, Type mainType, Collection<Type> allParameters)
 	{
-		setSource(source);
-		setDestination(destination);
-		setintermediary(intermediary);
+		this.source = source;
+		this.destination = destination;
+		this.intermediary = intermediary;
 		this.methodName = methodName;
 		this.isImplicit = isImplicit;
-		this.internalParameters = new ArrayList<String>(internalParameters);
-		this.allParameters = new ArrayList<String>(allParameters);
+		this.allParameters = new ArrayList<Type>(allParameters);
 		this.mainType = mainType;
 	}
 
@@ -35,78 +32,48 @@ public abstract class Relation
 	public abstract RelationType getRelationType();
 	public abstract String toString();
 
-	public void setSource(String source)
-	{
-		this.source = source.replaceAll("\\[\\]", "");
-	}
-
-	public void setDestination(String destination)
-	{
-		this.destination = destination.replaceAll("\\[\\]", "");
-	}
-
-	public void setintermediary(String intermediary)
-	{
-		this.intermediary = intermediary.replaceAll("\\[\\]", "");
-	}
-
-	public String getMethodName()
-	{
-		return this.methodName;
-	}
 	public boolean isImplicit()
 	{
 		return this.isImplicit;
 	}
 	public Collection<String> getInternalParamenters()
 	{
-		return internalParameters;
+		// TODO IMPLEMENT
+		return null;
 	}
-	public Collection<String> getAllParamenters()
+	public Collection<Type> getAllParamenters()
 	{
 		return allParameters;
 	}
 	public int getNumInternalParameters()
 	{
-		return internalParameters.size();
+		// TODO IMPLEMENT
+		return 0;
 	}
 	public int getNumAllParameters()
 	{
 		return allParameters.size();
 	}
-	public String getSource()
+	public Type getSource()
 	{
 		return this.source;
 	}
-	public String getIntermediary()
+	public Type getIntermediary()
 	{
 		return this.intermediary;
 	}
-	public String getDestination()
+	public Type getDestination()
 	{
 		return this.destination;
 	}
-	public String getMainType()
+	public String getMethodName()
+	{
+		return this.methodName;
+	}
+	public Type getMainType()
 	{
 		return this.mainType;
 	}
-	public String getMainTypeName()
-	{
-		return (this.mainType == null) ? null : this.mainType.substring(this.mainType.lastIndexOf(".") + 1);
-	}
-	public String getSourceName()
-	{
-		return this.source.substring(this.source.lastIndexOf(".") + 1);
-	}
-	public String getIntermediaryName()
-	{
-		return this.intermediary.substring(this.intermediary.lastIndexOf(".") + 1);
-	}
-	public String getDestinationName()
-	{
-		return this.destination.substring(this.destination.lastIndexOf(".") + 1);
-	}
-
 	@Override
 	public int hashCode()
 	{
@@ -135,8 +102,7 @@ public abstract class Relation
 	public boolean isEquivalent(Relation r)
 	{
 		return destination.equals(r.destination) && intermediary.equals(r.intermediary)
-				&& methodName.equals(r.methodName)
-				&& internalParameters.equals(r.internalParameters);
+				&& methodName.equals(r.methodName);
 	}
 
 	public abstract double calculateCost();

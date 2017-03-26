@@ -16,7 +16,7 @@ public interface RelationExtractor
 	 *            wildcard in format: pt.iscte.hmcgf.*
 	 * @return true if analysis executed successfully, false otherwise
 	 */
-	public boolean analyseClasses(String wildcard);
+	public boolean analyseClasses(String wildcard, boolean exploreSubtypes);
 	/**
 	 * Retrieve RelationStorage Object from Extractor
 	 * 
