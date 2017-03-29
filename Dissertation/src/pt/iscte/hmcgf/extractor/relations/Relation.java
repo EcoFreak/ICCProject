@@ -14,6 +14,7 @@ public abstract class Relation
 	 */
 	protected Type				mainType;
 	protected Collection<Type>	allParameters;
+	protected Collection<Type>	internalParameters;
 	protected boolean			isImplicit;
 
 	public Relation(Type source, Type destination, Type intermediary,
@@ -25,6 +26,8 @@ public abstract class Relation
 		this.methodName = methodName;
 		this.isImplicit = isImplicit;
 		this.allParameters = new ArrayList<Type>(allParameters);
+		this.internalParameters = new ArrayList<>();
+		initializeInternalParameters();
 		this.mainType = mainType;
 	}
 
@@ -36,10 +39,17 @@ public abstract class Relation
 	{
 		return this.isImplicit;
 	}
-	public Collection<String> getInternalParamenters()
+	private void initializeInternalParameters()
 	{
-		// TODO IMPLEMENT
-		return null;
+		for (Type type : allParameters)
+		{
+			if (!type.IsEnum() && !type.IsPrimitive() && !type.IsExternal())
+				internalParameters.add(type);
+		}
+	}
+	public Collection<Type> getInternalParamenters()
+	{
+		return internalParameters;
 	}
 	public Collection<Type> getAllParamenters()
 	{
@@ -47,8 +57,7 @@ public abstract class Relation
 	}
 	public int getNumInternalParameters()
 	{
-		// TODO IMPLEMENT
-		return 0;
+		return getInternalParamenters().size();
 	}
 	public int getNumAllParameters()
 	{

@@ -8,8 +8,10 @@ public class Type
 	private boolean	isEnum;
 	private boolean	isAbstract;
 	private boolean	isValueObject;
+	private boolean	isPrimitive;
 
-	public Type(String canonicalName, boolean isExternal, boolean isStatic, boolean isEnum, boolean isAbstract, boolean isValueObject)
+	public Type(String canonicalName, boolean isExternal, boolean isStatic, boolean isEnum, boolean isAbstract, boolean isValueObject,
+			boolean isPrimitive)
 	{
 		this.canonicalName = canonicalName;
 		this.isExternal = isExternal;
@@ -17,6 +19,7 @@ public class Type
 		this.isEnum = isEnum;
 		this.isAbstract = isAbstract;
 		this.isValueObject = isValueObject;
+		this.isPrimitive = isPrimitive;
 	}
 
 	public String getCanonicalName()
@@ -35,6 +38,11 @@ public class Type
 	public boolean IsExternal()
 	{
 		return this.isExternal;
+	}
+
+	public boolean IsPrimitive()
+	{
+		return this.isPrimitive;
 	}
 
 	public boolean IsStatic()

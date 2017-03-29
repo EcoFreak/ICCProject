@@ -6,6 +6,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +19,7 @@ import org.reflections.util.FilterBuilder;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
+import io.github.lukehutch.fastclasspathscanner.scanner.ScanResult;
 import pt.iscte.hmcgf.extractor.relations.InstanceInInstanceMethodRelation;
 import pt.iscte.hmcgf.extractor.relations.ParamInConstructorRelation;
 import pt.iscte.hmcgf.extractor.relations.ParamInInstanceMethodRelation;
@@ -48,12 +50,22 @@ public class ReflectionRelationExtractor implements RelationExtractor
 		this.reflectionsInstance = new Reflections(wildcard);
 		this.storedSubTypes = ArrayListMultimap.create();
 		this.storedTypes = new HashMap<>();
-		this.storedTypes.put(namespace + "." + NO_TYPE, new Type(namespace + "." + NO_TYPE, false, false, false, false, false));
+		this.storedTypes.put(namespace + "." + NO_TYPE, new Type(namespace + "." + NO_TYPE, false, false, false, false, false, false));
 		Set<Class<?>> classes = getAllClasses();
+		int counter = 0;
 		for (Class<?> c : classes)
 		{
-			if(c.isAnonymousClass())
+			if (c.isAnonymousClass())
+			{
+				counter++;
 				continue;
+			}
+			else if (c.getCanonicalName() == null)
+			{
+				counter++;
+				// System.err.println(c.getSimpleName() + " has null canonical name");
+				continue;
+			}
 			try
 			{
 				handleMethods(c);
@@ -65,6 +77,7 @@ public class ReflectionRelationExtractor implements RelationExtractor
 				// SUPRESS WARNING WITH NOCLASSDEF ERRORS
 			}
 		}
+		System.out.println(namespace + ": " + counter + " classes not loaded");
 		return classes.isEmpty();
 	}
 
@@ -222,11 +235,12 @@ public class ReflectionRelationExtractor implements RelationExtractor
 						areAllMethodsStatic(c.getMethods()),
 						c.isEnum(),
 						Modifier.isAbstract(c.getModifiers()),
-						containsMethodByName(c.getDeclaredMethods(), "equals"));
+						containsMethodByName(c.getDeclaredMethods(), "equals"),
+						c.isPrimitive());
 			}
 			catch (ClassNotFoundException e)
 			{
-				t = new Type(fixedName, !canonicalName.startsWith(namespace), false, false, false, false);
+				t = new Type(fixedName, !canonicalName.startsWith(namespace), false, false, false, false, false);
 				// TODO CHECK THIS!!!
 				// e.printStackTrace();
 			}
@@ -275,8 +289,9 @@ public class ReflectionRelationExtractor implements RelationExtractor
 				.setUrls(ClasspathHelper.forClassLoader(classLoadersList.toArray(new ClassLoader[0])))
 				.filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix(namespace))));
 
-		//new FastClasspathScanner("!!","org.eclipse.swt").scan().getNamesOfAllStandardClasses()
 		classes = reflections.getSubTypesOf(Object.class);
+		ScanResult r = new FastClasspathScanner("!!", this.namespace).scan();
+		classes = new HashSet<>(r.classNamesToClassRefs(r.getNamesOfAllStandardClasses(), true));
 		System.out.println(namespace + ": Found " + classes.size() + " types");
 		return classes;
 	}

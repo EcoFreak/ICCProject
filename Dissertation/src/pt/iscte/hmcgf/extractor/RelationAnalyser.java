@@ -116,14 +116,16 @@ public class RelationAnalyser
 		cell = row.createCell(4);
 		cell.setCellValue("Num Params (total)");
 		cell = row.createCell(5);
-		cell.setCellValue("Relation Type");
+		cell.setCellValue("Num Outgoing for outgoing type");
 		cell = row.createCell(6);
-		cell.setCellValue("Intermediary type");
+		cell.setCellValue("Relation Type");
 		cell = row.createCell(7);
-		cell.setCellValue("Is Implicit?");
+		cell.setCellValue("Intermediary type");
 		cell = row.createCell(8);
-		cell.setCellValue("Parent type");
+		cell.setCellValue("Is Implicit?");
 		cell = row.createCell(9);
+		cell.setCellValue("Parent type");
+		cell = row.createCell(10);
 		cell.setCellValue("Estimated cost");
 		// iterate nodes for relationships
 		int rownum = 1;
@@ -146,6 +148,8 @@ public class RelationAnalyser
 				cell = row.createCell(cellnum++);
 				cell.setCellValue(relation.getNumAllParameters());
 				cell = row.createCell(cellnum++);
+				cell.setCellValue(graph.outgoingEdgesOf(relation.getDestination()).size());
+				cell = row.createCell(cellnum++);
 				cell.setCellValue(relation.getRelationType().toString());
 				cell = row.createCell(cellnum++);
 				cell.setCellValue(relation.getIntermediary().getCanonicalName());
@@ -158,7 +162,7 @@ public class RelationAnalyser
 				cell = row.createCell(cellnum++);
 			}
 		}
-		sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 9));
+		sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 10));
 		sheet.autoSizeColumn(0);
 		sheet.autoSizeColumn(1);
 		sheet.autoSizeColumn(2);
