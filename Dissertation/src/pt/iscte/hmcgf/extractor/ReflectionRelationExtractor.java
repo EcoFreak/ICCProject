@@ -52,6 +52,8 @@ public class ReflectionRelationExtractor implements RelationExtractor
 		Set<Class<?>> classes = getAllClasses();
 		for (Class<?> c : classes)
 		{
+			if(c.isAnonymousClass())
+				continue;
 			try
 			{
 				handleMethods(c);
