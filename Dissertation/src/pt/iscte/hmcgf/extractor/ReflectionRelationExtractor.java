@@ -278,19 +278,23 @@ public class ReflectionRelationExtractor implements RelationExtractor
 	private Set<Class<?>> getAllClasses()
 	{
 		Set<Class<?>> classes = null;
-		List<ClassLoader> classLoadersList = new LinkedList<ClassLoader>();
-		classLoadersList.add(ClasspathHelper.contextClassLoader());
-		classLoadersList.add(ClasspathHelper.staticClassLoader());
-		classLoadersList.add(ClassLoader.getSystemClassLoader());
-
-		Reflections reflections = new Reflections(new ConfigurationBuilder()
-				.setScanners(new SubTypesScanner(
-						false /* don't exclude Object.class */), new ResourcesScanner())
-				.setUrls(ClasspathHelper.forClassLoader(classLoadersList.toArray(new ClassLoader[0])))
-				.filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix(namespace))));
-
-		classes = reflections.getSubTypesOf(Object.class);
+		
+		// OLD BEGIN
+//		List<ClassLoader> classLoadersList = new LinkedList<ClassLoader>();
+//		classLoadersList.add(ClasspathHelper.contextClassLoader());
+//		classLoadersList.add(ClasspathHelper.staticClassLoader());
+//		classLoadersList.add(ClassLoader.getSystemClassLoader());
+//
+//		Reflections reflections = new Reflections(new ConfigurationBuilder()
+//				.setScanners(new SubTypesScanner(
+//						false /* don't exclude Object.class */), new ResourcesScanner())
+//				.setUrls(ClasspathHelper.forClassLoader(classLoadersList.toArray(new ClassLoader[0])))
+//				.filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix(namespace))));
+//
+//		classes = reflections.getSubTypesOf(Object.class);
+		//OLD END
 		ScanResult r = new FastClasspathScanner("!!", this.namespace).scan();
+		
 		classes = new HashSet<>(r.classNamesToClassRefs(r.getNamesOfAllStandardClasses(), true));
 		System.out.println(namespace + ": Found " + classes.size() + " types");
 		return classes;
