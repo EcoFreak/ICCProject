@@ -21,18 +21,18 @@ public class Main {
 		GraphRelationStorage s = new GraphRelationStorage();
 		ReflectionRelationExtractor e = new ReflectionRelationExtractor(s);
 		// e.analyseClasses("pt.iscte.hmcgf.extractor.test.dummy",false);
-		//e.analyseClasses("javax.mail", false);
+		// e.analyseClasses("javax.mail", false);
 		// e.analyseClasses("javax.xml", false);
 		e.analyseClasses("org.eclipse.swt", false);
-		//e.analyseClasses("org.jfree.chart", false);
-		//e.analyseClasses("javax.swing", false);
+		// e.analyseClasses("org.jfree.chart", false);
+		// e.analyseClasses("javax.swing", false);
 		DirectedPseudograph<Type, Relation> graph = s.getGraph();
-	//	RelationAnalyser.analiseGraph("javax.mail", graph);
+		// RelationAnalyser.analiseGraph("javax.mail", graph);
 		// RelationAnalyser.analiseGraph("javax.xml", graph);
 		// RelationAnalyser.analiseGraph("pt.iscte.hmcgf.extractor.test.dummy",
 		// graph);
-		RelationAnalyser.analiseGraph("javax.swing", graph);
-//		RelationAnalyser.analiseGraph("org.jfree.chart", graph);
+		RelationAnalyser.analiseGraph("org.eclipse.swt", graph);
+		// RelationAnalyser.analiseGraph("org.jfree.chart", graph);
 		// RelationAnalyser.analiseGraph("", graph);
 
 		/*

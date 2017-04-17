@@ -7,17 +7,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
+
 import org.reflections.Reflections;
-import org.reflections.scanners.ResourcesScanner;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
-import org.reflections.util.FilterBuilder;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import io.github.lukehutch.fastclasspathscanner.scanner.ScanResult;
 import pt.iscte.hmcgf.extractor.relations.InstanceInInstanceMethodRelation;
@@ -27,52 +23,44 @@ import pt.iscte.hmcgf.extractor.relations.ParamInStaticMethodRelation;
 import pt.iscte.hmcgf.extractor.relations.RelationStorage;
 import pt.iscte.hmcgf.extractor.relations.Type;
 
-public class ReflectionRelationExtractor implements RelationExtractor
-{
-	public static final String				NO_TYPE	= "NO_TYPE";
-	private String							namespace;
-	private RelationStorage					storage;
-	private Reflections						reflectionsInstance;
-	private Multimap<Class<?>, Class<?>>	storedSubTypes;
-	private HashMap<String, Type>			storedTypes;
-	private boolean							exploreSubtypes;
+public class ReflectionRelationExtractor implements RelationExtractor {
+	public static final String NO_TYPE = "NO_TYPE";
+	private String namespace;
+	private RelationStorage storage;
+	private Reflections reflectionsInstance;
+	private Multimap<Class<?>, Class<?>> storedSubTypes;
+	private HashMap<String, Type> storedTypes;
+	private boolean exploreSubtypes;
 
-	public ReflectionRelationExtractor(RelationStorage storage)
-	{
+	public ReflectionRelationExtractor(RelationStorage storage) {
 		this.storage = storage;
 	}
 
 	@Override
-	public boolean analyseClasses(String wildcard, boolean exploreSubtypes)
-	{
+	public boolean analyseClasses(String wildcard, boolean exploreSubtypes) {
 		this.namespace = wildcard;
 		this.exploreSubtypes = exploreSubtypes;
 		this.reflectionsInstance = new Reflections(wildcard);
 		this.storedSubTypes = ArrayListMultimap.create();
 		this.storedTypes = new HashMap<>();
-		this.storedTypes.put(namespace + "." + NO_TYPE, new Type(namespace + "." + NO_TYPE, false, false, false, false, false, false));
+		this.storedTypes.put(namespace + "." + NO_TYPE,
+				new Type(namespace + "." + NO_TYPE, false, false, false, false, false, false));
 		Set<Class<?>> classes = getAllClasses();
 		int counter = 0;
-		for (Class<?> c : classes)
-		{
-			if (c.isAnonymousClass())
-			{
+		for (Class<?> c : classes) {
+			if (c.isAnonymousClass()) {
 				counter++;
 				continue;
-			}
-			else if (c.getCanonicalName() == null)
-			{
+			} else if (c.getCanonicalName() == null) {
 				counter++;
-				// System.err.println(c.getSimpleName() + " has null canonical name");
+				// System.err.println(c.getSimpleName() + " has null canonical
+				// name");
 				continue;
 			}
-			try
-			{
+			try {
 				handleMethods(c);
 				handleConstructors(c);
-			}
-			catch (NoClassDefFoundError e)
-			{
+			} catch (NoClassDefFoundError e) {
 				// System.err.println(e);
 				// SUPRESS WARNING WITH NOCLASSDEF ERRORS
 			}
@@ -81,166 +69,140 @@ public class ReflectionRelationExtractor implements RelationExtractor
 		return classes.isEmpty();
 	}
 
-	private void handleConstructors(Class<?> c)
-	{
+	private void handleConstructors(Class<?> c) {
 		Constructor<?>[] constructors = c.getConstructors();
-		for (Constructor<?> constructor : constructors)
-		{
+		for (Constructor<?> constructor : constructors) {
 			int numValidParamsFound = 0;
-			for (Class<?> paramType : constructor.getParameterTypes())
-			{
-				if (paramType.getCanonicalName().startsWith(namespace))
-				{
+			for (Class<?> paramType : constructor.getParameterTypes()) {
+				if (paramType.getCanonicalName().startsWith(namespace)) {
 					numValidParamsFound++;
 					Type source = getTypeForClass(paramType);
 					Type destination = getTypeForClass(c);
-					storage.addRelation(
-							new ParamInConstructorRelation(source, destination, false, null, convertParameterTypes(constructor.getParameterTypes())));
-					if (exploreSubtypes)
-					{
-						for (Class<?> subType : getSubTypesOfClass(paramType))
-						{
-							Type subTypeSource = getTypeForClass(subType);
-							storage.addRelation(new ParamInConstructorRelation(subTypeSource, destination, true, source,
-									convertParameterTypes(constructor.getParameterTypes())));
+					if (source != null && destination != null) {
+						storage.addRelation(new ParamInConstructorRelation(source, destination, false, null,
+								convertParameterTypes(constructor.getParameterTypes())));
+						if (exploreSubtypes) {
+							for (Class<?> subType : getSubTypesOfClass(paramType)) {
+								Type subTypeSource = getTypeForClass(subType);
+								storage.addRelation(new ParamInConstructorRelation(subTypeSource, destination, true,
+										source, convertParameterTypes(constructor.getParameterTypes())));
+							}
 						}
+
 					}
 				}
 			}
-			if (numValidParamsFound == 0)
-			{
-				// Constructor has no parameters or no API Types are used as parameters, create relationship for type NO_TYPE
+			if (numValidParamsFound == 0) {
+				// Constructor has no parameters or no API Types are used as
+				// parameters, create relationship for type NO_TYPE
 				Type source = getTypeForCanonicalName(namespace + "." + NO_TYPE);
 				Type destination = getTypeForClass(c);
-				storage.addRelation(
-						new ParamInConstructorRelation(source, destination, false, null, convertParameterTypes(constructor.getParameterTypes())));
+				if (destination != null && source != null)
+					storage.addRelation(new ParamInConstructorRelation(source, destination, false, null,
+							convertParameterTypes(constructor.getParameterTypes())));
 			}
 		}
 	}
 
-	private void handleMethods(Class<?> c) throws NoClassDefFoundError
-	{
+	private void handleMethods(Class<?> c) throws NoClassDefFoundError {
 		Method[] methods = c.getMethods();
-		for (Method method : methods)
-		{
+		for (Method method : methods) {
 			if (method.getDeclaringClass().equals(Object.class)
 					|| !isApiType(method.getReturnType().getCanonicalName()))
 				continue;
 			int numValidParamsFound = 0;
-			for (Class<?> paramType : method.getParameterTypes())
-			{
+			for (Class<?> paramType : method.getParameterTypes()) {
 				if (method.getReturnType().getCanonicalName().startsWith(namespace)
-						&& method.getReturnType().getCanonicalName().startsWith(namespace))
-				{
+						&& method.getReturnType().getCanonicalName().startsWith(namespace)) {
 					// internal relationship
-					if (paramType.getCanonicalName().startsWith(namespace))
-					{
+					if (paramType.getCanonicalName().startsWith(namespace)) {
 						// internal relationship with internal parameters
 						numValidParamsFound++;
 						ArrayList<Class<?>> types = new ArrayList<>();
 						types.add(paramType);
 						if (exploreSubtypes)
 							types.addAll(getSubTypesOfClass(paramType));
-						for (int i = 0; i < types.size(); i++)
-						{
+						for (int i = 0; i < types.size(); i++) {
 							Class<?> t = types.get(i);
 							Type source = getTypeForClass(t);
 							Type destination = getTypeForClass(method.getReturnType());
 							Type intermidiary = getTypeForClass(c);
 
-							if (Modifier.isStatic(method.getModifiers()))
-							{
+							if (Modifier.isStatic(method.getModifiers())) {
 								// STATIC PARAM RELATION
-								storage.addRelation(
-										new ParamInStaticMethodRelation(source, destination, intermidiary, method.getName(),
-												i > 0, ((i == 0) ? null : getTypeForClass(types.get(0))),
-												convertParameterTypes(method.getParameterTypes())));
-							}
-							else
-							{
+								storage.addRelation(new ParamInStaticMethodRelation(source, destination, intermidiary,
+										method.getName(), i > 0, ((i == 0) ? null : getTypeForClass(types.get(0))),
+										convertParameterTypes(method.getParameterTypes())));
+							} else {
 								// NON STATIC PARAM RELATION
-								storage.addRelation(
-										new ParamInInstanceMethodRelation(source, destination, intermidiary, method.getName(),
-												i > 0, ((i == 0) ? null : getTypeForClass(types.get(0))),
-												convertParameterTypes(method.getParameterTypes())));
+								storage.addRelation(new ParamInInstanceMethodRelation(source, destination, intermidiary,
+										method.getName(), i > 0, ((i == 0) ? null : getTypeForClass(types.get(0))),
+										convertParameterTypes(method.getParameterTypes())));
 							}
 						}
 						// STATIC INSTANCE RELATION
 						if (Modifier.isStatic(method.getModifiers()))
-							storage.addRelation(
-									new InstanceInInstanceMethodRelation(getTypeForClass(c), getTypeForClass(method.getReturnType()),
-											getTypeForClass(c), method.getName(), false, null, convertParameterTypes(method.getParameterTypes())));
+							storage.addRelation(new InstanceInInstanceMethodRelation(getTypeForClass(c),
+									getTypeForClass(method.getReturnType()), getTypeForClass(c), method.getName(),
+									false, null, convertParameterTypes(method.getParameterTypes())));
 					}
 				}
 			}
-			if (numValidParamsFound == 0)
-			{
-				// Method has no parameters or no API Types are used as parameters, create relationship for type NO_TYPE
+			if (numValidParamsFound == 0) {
+				// Method has no parameters or no API Types are used as
+				// parameters, create relationship for type NO_TYPE
 				Type source = getTypeForCanonicalName(namespace + "." + NO_TYPE);
 				Type destination = getTypeForClass(method.getReturnType());
 				Type intermidiary = getTypeForClass(c);
-				if (Modifier.isStatic(method.getModifiers()))
-				{
-					storage.addRelation(
-							new ParamInStaticMethodRelation(source, destination, intermidiary, method.getName(),
-									false, null, convertParameterTypes(method.getParameterTypes())));
-				}
-				else
-				{
+				if (Modifier.isStatic(method.getModifiers())) {
+					storage.addRelation(new ParamInStaticMethodRelation(source, destination, intermidiary,
+							method.getName(), false, null, convertParameterTypes(method.getParameterTypes())));
+				} else {
 					// Static create both param and instance
 					// TODO Check if create both makes sense in this case
-					storage.addRelation(
-							new ParamInInstanceMethodRelation(source, destination, intermidiary, method.getName(),
-									false, null, convertParameterTypes(method.getParameterTypes())));
-					storage.addRelation(
-							new InstanceInInstanceMethodRelation(intermidiary, destination, intermidiary, method.getName(),
-									false, null, convertParameterTypes(method.getParameterTypes())));
+					if (source != null && destination != null && intermidiary != null) {
+						storage.addRelation(new ParamInInstanceMethodRelation(source, destination, intermidiary,
+								method.getName(), false, null, convertParameterTypes(method.getParameterTypes())));
+						storage.addRelation(new InstanceInInstanceMethodRelation(intermidiary, destination,
+								intermidiary, method.getName(), false, null,
+								convertParameterTypes(method.getParameterTypes())));
+
+					}
 
 				}
 			}
 		}
 	}
 
-	private boolean isApiType(String type)
-	{
+	private boolean isApiType(String type) {
 		return type.contains(".");
 	}
 
-	private Collection<Type> convertParameterTypes(Class<?>[] params)
-	{
+	private Collection<Type> convertParameterTypes(Class<?>[] params) {
 		ArrayList<Type> typeParams = new ArrayList<>();
-		for (Class<?> c : params)
-		{
-			typeParams.add(getTypeForClass(c));
+		for (Class<?> c : params) {
+			Type t = getTypeForClass(c);
+			if (t != null)
+				typeParams.add(t);
 		}
 		return typeParams;
 	}
 
-	private Type getTypeForClass(Class<?> c)
-	{
+	private Type getTypeForClass(Class<?> c) {
 		return getTypeForCanonicalName(c.getCanonicalName());
 	}
 
-	private Type getTypeForCanonicalName(String canonicalName)
-	{
-		if (!storedTypes.containsKey(canonicalName))
-		{
+	private Type getTypeForCanonicalName(String canonicalName) {
+		if (!storedTypes.containsKey(canonicalName)) {
 			Type t = null;
 			String fixedName = canonicalName.replaceAll("\\[\\]", "");
-			try
-			{
+			try {
 				Class<?> c = Class.forName(fixedName);
-				t = new Type(fixedName,
-						!canonicalName.startsWith(namespace),
-						areAllMethodsStatic(c.getMethods()),
-						c.isEnum(),
-						Modifier.isAbstract(c.getModifiers()),
-						containsMethodByName(c.getDeclaredMethods(), "equals"),
-						c.isPrimitive());
-			}
-			catch (ClassNotFoundException e)
-			{
-				t = new Type(fixedName, !canonicalName.startsWith(namespace), false, false, false, false, false);
+				t = new Type(fixedName, !canonicalName.startsWith(namespace), areAllMethodsStatic(c.getMethods()),
+						c.isEnum(), Modifier.isAbstract(c.getModifiers()),
+						containsMethodByName(c.getDeclaredMethods(), "equals"), c.isPrimitive());
+			} catch (Throwable e) {
+				return null;
 				// TODO CHECK THIS!!!
 				// e.printStackTrace();
 			}
@@ -250,59 +212,55 @@ public class ReflectionRelationExtractor implements RelationExtractor
 		return storedTypes.get(canonicalName);
 	}
 
-	private static boolean areAllMethodsStatic(Method[] methods)
-	{
+	private static boolean areAllMethodsStatic(Method[] methods) {
 		for (Method method : methods)
 			if (Modifier.isStatic(method.getModifiers()))
 				return false;
 		return true;
 	}
 
-	private static boolean containsMethodByName(Method[] methods, String name)
-	{
-		for (Method method : methods)
-		{
+	private static boolean containsMethodByName(Method[] methods, String name) {
+		for (Method method : methods) {
 			if (method.getName().equals(name))
 				return true;
 		}
 		return false;
 	}
 
-	private Collection<Class<?>> getSubTypesOfClass(Class<?> c)
-	{
+	private Collection<Class<?>> getSubTypesOfClass(Class<?> c) {
 		if (!this.storedSubTypes.containsKey(c))
 			this.storedSubTypes.putAll(c, reflectionsInstance.getSubTypesOf(c));
 		return this.storedSubTypes.get(c);
 	}
 
-	private Set<Class<?>> getAllClasses()
-	{
+	private Set<Class<?>> getAllClasses() {
 		Set<Class<?>> classes = null;
-		
+
 		// OLD BEGIN
-//		List<ClassLoader> classLoadersList = new LinkedList<ClassLoader>();
-//		classLoadersList.add(ClasspathHelper.contextClassLoader());
-//		classLoadersList.add(ClasspathHelper.staticClassLoader());
-//		classLoadersList.add(ClassLoader.getSystemClassLoader());
-//
-//		Reflections reflections = new Reflections(new ConfigurationBuilder()
-//				.setScanners(new SubTypesScanner(
-//						false /* don't exclude Object.class */), new ResourcesScanner())
-//				.setUrls(ClasspathHelper.forClassLoader(classLoadersList.toArray(new ClassLoader[0])))
-//				.filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix(namespace))));
-//
-//		classes = reflections.getSubTypesOf(Object.class);
-		//OLD END
+		// List<ClassLoader> classLoadersList = new LinkedList<ClassLoader>();
+		// classLoadersList.add(ClasspathHelper.contextClassLoader());
+		// classLoadersList.add(ClasspathHelper.staticClassLoader());
+		// classLoadersList.add(ClassLoader.getSystemClassLoader());
+		//
+		// Reflections reflections = new Reflections(new ConfigurationBuilder()
+		// .setScanners(new SubTypesScanner(
+		// false /* don't exclude Object.class */), new ResourcesScanner())
+		// .setUrls(ClasspathHelper.forClassLoader(classLoadersList.toArray(new
+		// ClassLoader[0])))
+		// .filterInputsBy(new
+		// FilterBuilder().include(FilterBuilder.prefix(namespace))));
+		//
+		// classes = reflections.getSubTypesOf(Object.class);
+		// OLD END
 		ScanResult r = new FastClasspathScanner("!!", this.namespace).scan();
-		
+
 		classes = new HashSet<>(r.classNamesToClassRefs(r.getNamesOfAllStandardClasses(), true));
 		System.out.println(namespace + ": Found " + classes.size() + " types");
 		return classes;
 	}
 
 	@Override
-	public RelationStorage getRelationStorage()
-	{
+	public RelationStorage getRelationStorage() {
 		return storage;
 	}
 
