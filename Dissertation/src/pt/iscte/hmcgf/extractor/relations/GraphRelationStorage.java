@@ -1,7 +1,8 @@
 package pt.iscte.hmcgf.extractor.relations;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import org.jgrapht.graph.DirectedPseudograph;
 
 public class GraphRelationStorage implements RelationStorage
@@ -29,18 +30,6 @@ public class GraphRelationStorage implements RelationStorage
 	}
 
 	@Override
-	public Collection<Relation> getRelationsForType(Type type)
-	{
-		if (graph.containsVertex(type))
-			return graph.outgoingEdgesOf(type);
-		return new ArrayList<Relation>();
-	}
-	// TODO REMOVE TEMPORARY METHOD
-	public DirectedPseudograph<Type, Relation> getGraph()
-	{
-		return graph;
-	}
-	@Override
 	public int getTypeCount()
 	{
 		return graph.vertexSet().size();
@@ -51,23 +40,17 @@ public class GraphRelationStorage implements RelationStorage
 		return graph.edgeSet().size();
 	}
 	@Override
-	public Collection<Type> getAllTypes()
+	public Set<Type> getAllTypes()
 	{
 		return this.graph.vertexSet();
 	}
+
 	@Override
-	public Collection<Relation> getAllRelations()
+	public Set<Relation> getAllRelations()
 	{
 		return this.graph.edgeSet();
 	}
-	@Override
-	public Collection<Relation> getRelationsForString(String name)
-	{
-		Type t = getTypeByCanonicalName(name);
-		if (t == null)
-			return new ArrayList<Relation>();
-		return getRelationsForType(t);
-	}
+
 	@Override
 	public Type getTypeByCanonicalName(String canonicalName)
 	{
@@ -77,6 +60,48 @@ public class GraphRelationStorage implements RelationStorage
 				return t;
 		}
 		return null;
+	}
+
+	@Override
+	public List<Relation> getOutgoingRelationsForType(Type type)
+	{
+		if (graph.containsVertex(type))
+			return new ArrayList<Relation>(graph.outgoingEdgesOf(type));
+		return new ArrayList<Relation>();
+	}
+	@Override
+	public List<Relation> getOutgoingRelationsForString(String name)
+	{
+		Type t = getTypeByCanonicalName(name);
+		if (t == null)
+			return new ArrayList<Relation>();
+		return getOutgoingRelationsForType(t);
+	}
+	@Override
+	public List<Relation> getIncomingRelationsForType(Type type)
+	{
+		if (graph.containsVertex(type))
+			return new ArrayList<Relation>(graph.incomingEdgesOf(type));
+		return new ArrayList<Relation>();
+	}
+	@Override
+	public List<Relation> getIncomingRelationsForString(String name)
+	{
+		Type t = getTypeByCanonicalName(name);
+		if (t == null)
+			return new ArrayList<Relation>();
+		return getIncomingRelationsForType(t);
+	}
+	@Override
+	public List<Relation> getAllRelationsInNamespace(String namespace)
+	{
+		ArrayList<Relation> relationsForNamespace = new ArrayList<>();
+		for (Relation r : graph.edgeSet())
+		{
+			if (r.getSource().getCanonicalName().startsWith(namespace))
+				relationsForNamespace.add(r);
+		}
+		return relationsForNamespace;
 	}
 
 }

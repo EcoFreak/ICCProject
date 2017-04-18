@@ -2,6 +2,7 @@ package pt.iscte.hmcgf.extractor.relations;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public abstract class Relation
 {
@@ -116,6 +117,10 @@ public abstract class Relation
 
 	public abstract double calculateCost();
 
+	public abstract double calculateCost(List<Type> types);
+
+	public abstract String getUsageExample();
+	
 	public enum RelationType
 	{
 		PARAM_IN_STATIC_METHOD, PARAM_IN_INSTANCE_METHOD, INSTANCE_IN_INSTANCE_METHOD, PARAM_IN_CONSTRUCTOR, EXTERNAL

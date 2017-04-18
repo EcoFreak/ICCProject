@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -11,20 +12,23 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.jgrapht.graph.DirectedPseudograph;
 import pt.iscte.hmcgf.extractor.relations.Relation;
+import pt.iscte.hmcgf.extractor.relations.RelationStorage;
 import pt.iscte.hmcgf.extractor.relations.Type;
 
-public class RelationAnalyser {
+public class RelationAnalyser
+{
 	public static final String DIRECTORY = "exports";
 
-	public static void analiseGraph(String namespace, DirectedPseudograph<Type, Relation> graph) {
+	public static void analiseGraph(String namespace, RelationStorage storage)
+	{
 
 		HSSFWorkbook workbook = new HSSFWorkbook();
-		sheetAnalysis(namespace, graph, workbook);
-		sheetRelationships(namespace, graph, workbook);
+		sheetAnalysis(namespace, storage, workbook);
+		sheetRelationships(namespace, storage, workbook);
 
-		try {
+		try
+		{
 			if (!new File(DIRECTORY).exists())
 				new File(DIRECTORY).mkdir();
 			FileOutputStream out = new FileOutputStream(new File(DIRECTORY + "/" + namespace + ".xls"));
@@ -32,16 +36,20 @@ public class RelationAnalyser {
 			out.close();
 			System.out.println("Excel written successfully..");
 
-		} catch (FileNotFoundException e) {
+		}
+		catch (FileNotFoundException e)
+		{
 			e.printStackTrace();
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			e.printStackTrace();
 		}
 
 	}
 
-	private static void sheetAnalysis(String namespace, DirectedPseudograph<Type, Relation> graph,
-			HSSFWorkbook workbook) {
+	private static void sheetAnalysis(String namespace, RelationStorage storage, HSSFWorkbook workbook)
+	{
 		// create sheet for analysis
 		HSSFSheet sheet = workbook.createSheet(namespace);
 		Row row = sheet.createRow(0);
@@ -60,7 +68,8 @@ public class RelationAnalyser {
 		cell = row.createCell(6);
 		cell.setCellValue("Is Abstract Class?");
 		int rownum = 1;
-		for (Type vertex : graph.vertexSet()) {
+		for (Type vertex : storage.getAllTypes())
+		{
 			if (!vertex.getCanonicalName().startsWith(namespace))
 				continue;
 			row = sheet.createRow(rownum++);
@@ -68,13 +77,13 @@ public class RelationAnalyser {
 			cell = row.createCell(cellnum++);
 			cell.setCellValue(vertex.getCanonicalName());
 			cell = row.createCell(cellnum++);
-			cell.setCellValue(graph.incomingEdgesOf(vertex).size());
+			cell.setCellValue(storage.getIncomingRelationsForType(vertex).size());
 			cell = row.createCell(cellnum++);
-			cell.setCellValue(graph.outgoingEdgesOf(vertex).size());
+			cell.setCellValue(storage.getOutgoingRelationsForType(vertex).size());
 			cell = row.createCell(cellnum++);
-			cell.setCellValue(getUniqueIncomingTypesForRelationshipSet(graph.incomingEdgesOf(vertex)).size());
+			cell.setCellValue(RelationStorage.getUniqueIncomingTypesForRelationshipSet(storage.getIncomingRelationsForType(vertex)).size());
 			cell = row.createCell(cellnum++);
-			cell.setCellValue(getUniqueOutgoingTypesForRelationshipSet(graph.outgoingEdgesOf(vertex)).size());
+			cell.setCellValue(RelationStorage.getUniqueOutgoingTypesForRelationshipSet(storage.getOutgoingRelationsForType(vertex)).size());
 			cell = row.createCell(cellnum++);
 			cell.setCellValue(vertex.IsValueObject());
 			cell = row.createCell(cellnum++);
@@ -90,8 +99,8 @@ public class RelationAnalyser {
 		sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 6));
 	}
 
-	private static void sheetRelationships(String namespace, DirectedPseudograph<Type, Relation> graph,
-			HSSFWorkbook workbook) {
+	private static void sheetRelationships(String namespace, RelationStorage storage, HSSFWorkbook workbook)
+	{
 		// create sheet for relationship extraction
 		HSSFSheet sheet = workbook.createSheet("Relationships");
 		Row row = sheet.createRow(0);
@@ -119,10 +128,12 @@ public class RelationAnalyser {
 		cell.setCellValue("Estimated cost");
 		// iterate nodes for relationships
 		int rownum = 1;
-		for (Type vertex : graph.vertexSet()) {
+		for (Type vertex : storage.getAllTypes())
+		{
 			if (!vertex.getCanonicalName().startsWith(namespace))
 				continue;
-			for (Relation relation : graph.outgoingEdgesOf(vertex)) {
+			for (Relation relation : storage.getOutgoingRelationsForType(vertex))
+			{
 				row = sheet.createRow(rownum++);
 				int cellnum = 0;
 				cell = row.createCell(cellnum++);
@@ -137,7 +148,7 @@ public class RelationAnalyser {
 				cell.setCellValue(relation.getNumAllParameters());
 				cell = row.createCell(cellnum++);
 				cell.setCellValue(
-						getUniqueOutgoingTypesForRelationshipSet(graph.outgoingEdgesOf(relation.getDestination()))
+						RelationStorage.getUniqueOutgoingTypesForRelationshipSet(storage.getOutgoingRelationsForType(relation.getDestination()))
 								.size());
 				cell = row.createCell(cellnum++);
 				cell.setCellValue(relation.getRelationType().toString());
@@ -166,20 +177,5 @@ public class RelationAnalyser {
 		sheet.autoSizeColumn(10);
 	}
 
-	private static Set<Type> getUniqueOutgoingTypesForRelationshipSet(Set<Relation> set) {
-		HashSet<Type> outgoingTypes = new HashSet<Type>();
-		for (Relation r : set) {
-			outgoingTypes.add(r.getDestination());
-		}
-		return outgoingTypes;
-	}
-
-	private static Set<Type> getUniqueIncomingTypesForRelationshipSet(Set<Relation> set) {
-		HashSet<Type> incomingTypes = new HashSet<Type>();
-		for (Relation r : set) {
-			incomingTypes.add(r.getSource());
-		}
-		return incomingTypes;
-	}
 
 }

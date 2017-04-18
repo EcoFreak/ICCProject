@@ -1,6 +1,9 @@
 package pt.iscte.hmcgf.extractor.relations;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import com.google.common.base.CaseFormat;
 
 public class ParamInConstructorRelation extends Relation
 {
@@ -34,6 +37,22 @@ public class ParamInConstructorRelation extends Relation
 	public double calculateCost()
 	{
 		return 1 + getNumInternalParameters();
+	}
+
+	@Override
+	public double calculateCost(List<Type> types)
+	{
+		List<Type> filteredTypes = new ArrayList<Type>(this.getInternalParamenters());
+		filteredTypes.retainAll(types);
+		return 1.0 + (this.getInternalParamenters().size() - filteredTypes.size());
+	}
+
+	@Override
+	public String getUsageExample()
+	{
+		String d = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, destination.getName());
+		return String.format("%s %s = new %s(%d internal parameters)", destination.getName(), d, destination.getName(),
+				this.getNumInternalParameters());
 	}
 
 }

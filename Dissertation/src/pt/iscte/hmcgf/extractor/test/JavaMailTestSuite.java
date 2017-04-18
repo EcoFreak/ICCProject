@@ -56,7 +56,7 @@ public class JavaMailTestSuite
 		Type typeForMimeMessage = graph.getTypeByCanonicalName(MIME_MESSAGE);
 		assertNotNull(typeForSession);
 		assertTrue(typeForSession.getCanonicalName().equals(SESSION));
-		Collection<Relation> relationsForType = graph.getRelationsForType(typeForSession);
+		Collection<Relation> relationsForType = graph.getOutgoingRelationsForType(typeForSession);
 		// TODO ALSO CHECK TO GO TO SUPER TYPE (MESSAGE)
 		assertNotNull(relationsForType);
 		assertTrue(relationsForType.size() > 0);
@@ -84,7 +84,7 @@ public class JavaMailTestSuite
 		Type typeForTransport = graph.getTypeByCanonicalName(TRANSPORT);
 		assertNotNull(typeForMessage);
 		assertTrue(typeForMessage.getCanonicalName().equals(MESSAGE));
-		Collection<Relation> relationsForType = graph.getRelationsForType(typeForMessage);
+		Collection<Relation> relationsForType = graph.getOutgoingRelationsForType(typeForMessage);
 		assertNotNull(relationsForType);
 		assertTrue(relationsForType.size() > 0);
 		boolean found = false;

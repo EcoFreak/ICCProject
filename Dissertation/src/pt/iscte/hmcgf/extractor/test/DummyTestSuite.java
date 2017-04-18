@@ -58,7 +58,7 @@ public class DummyTestSuite
 	{
 		Type typeForC = graph.getTypeByCanonicalName(C);
 		Type typeForB = graph.getTypeByCanonicalName(B);
-		Collection<Relation> relationsForC = graph.getRelationsForType(typeForC);
+		Collection<Relation> relationsForC = graph.getOutgoingRelationsForType(typeForC);
 		boolean found = false;
 		assertTrue(relationsForC.size() > 0);
 		for (Relation relation : relationsForC)
@@ -78,7 +78,7 @@ public class DummyTestSuite
 		Type typeForA = graph.getTypeByCanonicalName(A);
 		Type typeForC = graph.getTypeByCanonicalName(C);
 		Type typeForB = graph.getTypeByCanonicalName(B);
-		Collection<Relation> relationForA = graph.getRelationsForType(typeForA);
+		Collection<Relation> relationForA = graph.getOutgoingRelationsForType(typeForA);
 		boolean found = false;
 		assertTrue(relationForA.size() > 0);
 		for (Relation relation : relationForA)
@@ -112,7 +112,7 @@ public class DummyTestSuite
 	{
 		for (Relation r : graph.getAllRelations())
 		{
-			assertTrue(graph.getRelationsForType(r.getSource()).contains(r));
+			assertTrue(graph.getOutgoingRelationsForType(r.getSource()).contains(r));
 		}
 	}
 
@@ -148,7 +148,7 @@ public class DummyTestSuite
 			if (r.isImplicit())
 			{
 				assertNotNull(r.getMainType());
-				Collection<Relation> relationsForMainType = graph.getRelationsForType(r.getMainType());
+				Collection<Relation> relationsForMainType = graph.getOutgoingRelationsForType(r.getMainType());
 				try
 				{
 					assertTrue(Class.forName(r.getMainType().getCanonicalName()).isAssignableFrom(Class.forName(r.getSource().getCanonicalName())));
@@ -174,7 +174,7 @@ public class DummyTestSuite
 		Collection<Type> allTypes = graph.getAllTypes();
 		for (Type type : allTypes)
 		{
-			Collection<Relation> relationsForType = graph.getRelationsForType(type);
+			Collection<Relation> relationsForType = graph.getOutgoingRelationsForType(type);
 			for (Relation relation : relationsForType)
 			{
 				assertTrue(relation.getSource().equals(type));
