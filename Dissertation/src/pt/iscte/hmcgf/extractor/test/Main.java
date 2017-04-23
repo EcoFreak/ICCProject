@@ -8,14 +8,17 @@ import pt.iscte.hmcgf.extractor.relations.GraphRelationStorage;
 public class Main
 {
 
+	private static final int NUM_STEPS = 100;
+
 	public static void main(String[] args)
 	{
 		GraphRelationStorage s = new GraphRelationStorage();
 		ReflectionRelationExtractor e = new ReflectionRelationExtractor(s);
-		e.analyseClasses("org.eclipse.swt", false);
-		RelationAnalyser.analiseGraph("org.eclipse.swt", s);
+		e.analyseClasses("javax.mail", false);
+		RelationAnalyser.analiseGraph("javax.mail", s);
 		RelationSimulator simulator = new RelationSimulator(false);
-		simulator.simulate("org.eclipse.swt", s, 5);
+		simulator.simulate("javax.mail", s, NUM_STEPS);
+		//simulator.simulate("org.eclipse.swt", s, NUM_STEPS);
 
 		/*
 		 * JFrame frame = new JFrame(); JGraphLayoutPanel layoutPanel = new JGraphLayoutPanel(graph); frame.getContentPane().add(layoutPanel);

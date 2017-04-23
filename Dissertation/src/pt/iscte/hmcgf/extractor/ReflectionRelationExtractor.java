@@ -48,6 +48,8 @@ public class ReflectionRelationExtractor implements RelationExtractor {
 		Set<Class<?>> classes = getAllClasses();
 		int counter = 0;
 		for (Class<?> c : classes) {
+
+			try {
 			if (c.isAnonymousClass()) {
 				counter++;
 				continue;
@@ -57,10 +59,9 @@ public class ReflectionRelationExtractor implements RelationExtractor {
 				// name");
 				continue;
 			}
-			try {
 				handleMethods(c);
 				handleConstructors(c);
-			} catch (NoClassDefFoundError e) {
+			} catch (Throwable e) {
 				// System.err.println(e);
 				// SUPRESS WARNING WITH NOCLASSDEF ERRORS
 			}
@@ -124,10 +125,12 @@ public class ReflectionRelationExtractor implements RelationExtractor {
 							types.addAll(getSubTypesOfClass(paramType));
 						for (int i = 0; i < types.size(); i++) {
 							Class<?> t = types.get(i);
+							//TODO CHECK THIS 19/04
 							Type source = getTypeForClass(t);
 							Type destination = getTypeForClass(method.getReturnType());
 							Type intermidiary = getTypeForClass(c);
-
+							if(source == null || destination == null || intermidiary == null)
+								continue;
 							if (Modifier.isStatic(method.getModifiers())) {
 								// STATIC PARAM RELATION
 								storage.addRelation(new ParamInStaticMethodRelation(source, destination, intermidiary,

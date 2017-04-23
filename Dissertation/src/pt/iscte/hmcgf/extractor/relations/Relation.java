@@ -4,23 +4,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class Relation
-{
-	protected Type				source;
-	protected Type				intermediary;
-	protected Type				destination;
-	protected String			methodName;
+import com.google.common.base.CaseFormat;
+
+public abstract class Relation {
+	protected Type source;
+	protected Type intermediary;
+	protected Type destination;
+	protected String methodName;
 	/**
 	 * mainType only used for subtype relation
 	 */
-	protected Type				mainType;
-	protected Collection<Type>	allParameters;
-	protected Collection<Type>	internalParameters;
-	protected boolean			isImplicit;
+	protected Type mainType;
+	protected Collection<Type> allParameters;
+	protected List<Type> internalParameters;
+	protected boolean isImplicit;
 
-	public Relation(Type source, Type destination, Type intermediary,
-			String methodName, boolean isImplicit, Type mainType, Collection<Type> allParameters)
-	{
+	public Relation(Type source, Type destination, Type intermediary, String methodName, boolean isImplicit,
+			Type mainType, Collection<Type> allParameters) {
 		this.source = source;
 		this.destination = destination;
 		this.intermediary = intermediary;
@@ -33,65 +33,75 @@ public abstract class Relation
 	}
 
 	public abstract boolean isStatic();
+
 	public abstract RelationType getRelationType();
+
 	public abstract String toString();
 
-	public boolean isImplicit()
-	{
+	public boolean isImplicit() {
 		return this.isImplicit;
 	}
-	private void initializeInternalParameters()
-	{
-		for (Type type : allParameters)
-		{
+
+	private void initializeInternalParameters() {
+		for (Type type : allParameters) {
 			if (!type.IsEnum() && !type.IsPrimitive() && !type.IsExternal())
 				internalParameters.add(type);
 		}
 	}
-	public Collection<Type> getInternalParamenters()
-	{
+
+	public Collection<Type> getInternalParamenters() {
 		return internalParameters;
 	}
-	public Collection<Type> getAllParamenters()
-	{
+
+	public String getInternalParamentersString() {
+		String s = "";
+		for (int i = 0; i < this.internalParameters.size(); i++) {
+			s += CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, this.internalParameters.get(i).getName());
+			if ((i + 1) < this.internalParameters.size())
+				s += ", ";
+		}
+		return s;
+	}
+
+	public Collection<Type> getAllParamenters() {
 		return allParameters;
 	}
-	public int getNumInternalParameters()
-	{
+
+	public int getNumInternalParameters() {
 		return getInternalParamenters().size();
 	}
-	public int getNumAllParameters()
-	{
+
+	public int getNumAllParameters() {
 		return allParameters.size();
 	}
-	public Type getSource()
-	{
+
+	public Type getSource() {
 		return this.source;
 	}
-	public Type getIntermediary()
-	{
+
+	public Type getIntermediary() {
 		return this.intermediary;
 	}
-	public Type getDestination()
-	{
+
+	public Type getDestination() {
 		return this.destination;
 	}
-	public String getMethodName()
-	{
+
+	public String getMethodName() {
 		return this.methodName;
 	}
-	public Type getMainType()
-	{
+
+	public Type getMainType() {
 		return this.mainType;
 	}
+
 	@Override
-	public int hashCode()
-	{
+	public int hashCode() {
 		return super.hashCode();
 	}
+
 	@Override
-	public boolean equals(Object obj)
-	{
+	public boolean equals(Object obj) {
 		if (!(obj instanceof Relation))
 			return false;
 		if (obj == this)
@@ -103,14 +113,14 @@ public abstract class Relation
 	}
 
 	/**
-	 * Checks if two relations are equal or equivalent (equal except in the source type)
+	 * Checks if two relations are equal or equivalent (equal except in the
+	 * source type)
 	 * 
 	 * @param r
 	 *            relation to test against
 	 * @return
 	 */
-	public boolean isEquivalent(Relation r)
-	{
+	public boolean isEquivalent(Relation r) {
 		return destination.equals(r.destination) && intermediary.equals(r.intermediary)
 				&& methodName.equals(r.methodName);
 	}
@@ -120,9 +130,8 @@ public abstract class Relation
 	public abstract double calculateCost(List<Type> types);
 
 	public abstract String getUsageExample();
-	
-	public enum RelationType
-	{
+
+	public enum RelationType {
 		PARAM_IN_STATIC_METHOD, PARAM_IN_INSTANCE_METHOD, INSTANCE_IN_INSTANCE_METHOD, PARAM_IN_CONSTRUCTOR, EXTERNAL
 	}
 }

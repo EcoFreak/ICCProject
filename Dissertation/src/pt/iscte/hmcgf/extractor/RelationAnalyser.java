@@ -16,19 +16,16 @@ import pt.iscte.hmcgf.extractor.relations.Relation;
 import pt.iscte.hmcgf.extractor.relations.RelationStorage;
 import pt.iscte.hmcgf.extractor.relations.Type;
 
-public class RelationAnalyser
-{
+public class RelationAnalyser {
 	public static final String DIRECTORY = "exports";
 
-	public static void analiseGraph(String namespace, RelationStorage storage)
-	{
+	public static void analiseGraph(String namespace, RelationStorage storage) {
 
 		HSSFWorkbook workbook = new HSSFWorkbook();
 		sheetAnalysis(namespace, storage, workbook);
 		sheetRelationships(namespace, storage, workbook);
 
-		try
-		{
+		try {
 			if (!new File(DIRECTORY).exists())
 				new File(DIRECTORY).mkdir();
 			FileOutputStream out = new FileOutputStream(new File(DIRECTORY + "/" + namespace + ".xls"));
@@ -36,20 +33,15 @@ public class RelationAnalyser
 			out.close();
 			System.out.println("Excel written successfully..");
 
-		}
-		catch (FileNotFoundException e)
-		{
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-		}
-		catch (IOException e)
-		{
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
 	}
 
-	private static void sheetAnalysis(String namespace, RelationStorage storage, HSSFWorkbook workbook)
-	{
+	private static void sheetAnalysis(String namespace, RelationStorage storage, HSSFWorkbook workbook) {
 		// create sheet for analysis
 		HSSFSheet sheet = workbook.createSheet(namespace);
 		Row row = sheet.createRow(0);
@@ -68,8 +60,7 @@ public class RelationAnalyser
 		cell = row.createCell(6);
 		cell.setCellValue("Is Abstract Class?");
 		int rownum = 1;
-		for (Type vertex : storage.getAllTypes())
-		{
+		for (Type vertex : storage.getAllTypes()) {
 			if (!vertex.getCanonicalName().startsWith(namespace))
 				continue;
 			row = sheet.createRow(rownum++);
@@ -81,9 +72,11 @@ public class RelationAnalyser
 			cell = row.createCell(cellnum++);
 			cell.setCellValue(storage.getOutgoingRelationsForType(vertex).size());
 			cell = row.createCell(cellnum++);
-			cell.setCellValue(RelationStorage.getUniqueIncomingTypesForRelationshipSet(storage.getIncomingRelationsForType(vertex)).size());
+			cell.setCellValue(RelationStorage
+					.getUniqueIncomingTypesForRelationshipSet(storage.getIncomingRelationsForType(vertex)).size());
 			cell = row.createCell(cellnum++);
-			cell.setCellValue(RelationStorage.getUniqueOutgoingTypesForRelationshipSet(storage.getOutgoingRelationsForType(vertex)).size());
+			cell.setCellValue(RelationStorage
+					.getUniqueOutgoingTypesForRelationshipSet(storage.getOutgoingRelationsForType(vertex)).size());
 			cell = row.createCell(cellnum++);
 			cell.setCellValue(vertex.IsValueObject());
 			cell = row.createCell(cellnum++);
@@ -99,8 +92,7 @@ public class RelationAnalyser
 		sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 6));
 	}
 
-	private static void sheetRelationships(String namespace, RelationStorage storage, HSSFWorkbook workbook)
-	{
+	private static void sheetRelationships(String namespace, RelationStorage storage, HSSFWorkbook workbook) {
 		// create sheet for relationship extraction
 		HSSFSheet sheet = workbook.createSheet("Relationships");
 		Row row = sheet.createRow(0);
@@ -128,12 +120,10 @@ public class RelationAnalyser
 		cell.setCellValue("Estimated cost");
 		// iterate nodes for relationships
 		int rownum = 1;
-		for (Type vertex : storage.getAllTypes())
-		{
+		for (Type vertex : storage.getAllTypes()) {
 			if (!vertex.getCanonicalName().startsWith(namespace))
 				continue;
-			for (Relation relation : storage.getOutgoingRelationsForType(vertex))
-			{
+			for (Relation relation : storage.getOutgoingRelationsForType(vertex)) {
 				row = sheet.createRow(rownum++);
 				int cellnum = 0;
 				cell = row.createCell(cellnum++);
@@ -147,13 +137,16 @@ public class RelationAnalyser
 				cell = row.createCell(cellnum++);
 				cell.setCellValue(relation.getNumAllParameters());
 				cell = row.createCell(cellnum++);
-				cell.setCellValue(
-						RelationStorage.getUniqueOutgoingTypesForRelationshipSet(storage.getOutgoingRelationsForType(relation.getDestination()))
-								.size());
+				cell.setCellValue(RelationStorage.getUniqueOutgoingTypesForRelationshipSet(
+						storage.getOutgoingRelationsForType(relation.getDestination())).size());
 				cell = row.createCell(cellnum++);
 				cell.setCellValue(relation.getRelationType().toString());
 				cell = row.createCell(cellnum++);
-				cell.setCellValue(relation.getIntermediary().getCanonicalName());
+				// TODO NULL POINTER
+				if (relation.getIntermediary() == null)
+					cell.setCellValue("------");
+				else
+					cell.setCellValue(relation.getIntermediary().getCanonicalName());
 				cell = row.createCell(cellnum++);
 				cell.setCellValue(relation.isImplicit());
 				cell = row.createCell(cellnum++);
@@ -176,6 +169,5 @@ public class RelationAnalyser
 		sheet.autoSizeColumn(9);
 		sheet.autoSizeColumn(10);
 	}
-
 
 }

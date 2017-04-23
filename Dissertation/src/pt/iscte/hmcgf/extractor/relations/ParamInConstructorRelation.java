@@ -51,8 +51,8 @@ public class ParamInConstructorRelation extends Relation
 	public String getUsageExample()
 	{
 		String d = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, destination.getName());
-		return String.format("%s %s = new %s(%d internal parameters)", destination.getName(), d, destination.getName(),
-				this.getNumInternalParameters());
+		return String.format("%s %s = new %s(%s);", destination.getName(), d, destination.getName(),
+				this.getInternalParamentersString());
 	}
 
 }
