@@ -87,6 +87,13 @@ public interface RelationStorage
 	 * @return collection of Relation
 	 */
 	public List<Relation> getAllRelationsInNamespace(String namespace);
+	
+	/**
+	 * Returns a collection with all stored relations in provided namespaces
+	 * 
+	 * @return collection of Relation
+	 */
+	public List<Relation> getAllRelationsInNamespace(List<String> namespaces);
 
 	
 	public static Set<Type> getUniqueOutgoingTypesForRelationshipSet(Collection<Relation> set)

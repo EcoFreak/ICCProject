@@ -1,5 +1,8 @@
 package pt.iscte.hmcgf.extractor.relations;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Type
 {
 	private String	canonicalName;
@@ -9,7 +12,9 @@ public class Type
 	private boolean	isAbstract;
 	private boolean	isValueObject;
 	private boolean	isPrimitive;
-
+	private List<Type> subtypes;
+	private List<Type> supertypes;
+	
 	public Type(String canonicalName, boolean isExternal, boolean isStatic, boolean isEnum, boolean isAbstract, boolean isValueObject,
 			boolean isPrimitive)
 	{
@@ -20,6 +25,8 @@ public class Type
 		this.isAbstract = isAbstract;
 		this.isValueObject = isValueObject;
 		this.isPrimitive = isPrimitive;
+		this.subtypes = new ArrayList<Type>();
+		this.setSupertypes(new ArrayList<Type>());
 	}
 
 	public String getCanonicalName()
@@ -82,5 +89,25 @@ public class Type
 	public boolean IsValueObject()
 	{
 		return isValueObject;
+	}
+
+	public List<Type> getSubtypes()
+	{
+		return subtypes;
+	}
+
+	public void setSubtypes(List<Type> subtypes)
+	{
+		this.subtypes = subtypes;
+	}
+
+	public List<Type> getSupertypes()
+	{
+		return supertypes;
+	}
+
+	public void setSupertypes(List<Type> supertypes)
+	{
+		this.supertypes = supertypes;
 	}
 }

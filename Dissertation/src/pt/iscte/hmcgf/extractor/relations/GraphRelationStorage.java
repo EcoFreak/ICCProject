@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.jgrapht.graph.DirectedPseudograph;
+import pt.iscte.hmcgf.extractor.ReflectionRelationExtractor;
 
 public class GraphRelationStorage implements RelationStorage
 {
@@ -22,12 +23,13 @@ public class GraphRelationStorage implements RelationStorage
 	@Override
 	public boolean addRelation(Relation r)
 	{
-		if(r != null){
-			
-		prep(r.getSource(), r.getDestination());
-		if (!graph.containsEdge(r))
-			return graph.addEdge(r.getSource(), r.getDestination(), r);
-		
+		if (r != null)
+		{
+
+			prep(r.getSource(), r.getDestination());
+			if (!graph.containsEdge(r))
+				return graph.addEdge(r.getSource(), r.getDestination(), r);
+
 		}
 		return false;
 	}
@@ -98,11 +100,23 @@ public class GraphRelationStorage implements RelationStorage
 	@Override
 	public List<Relation> getAllRelationsInNamespace(String namespace)
 	{
+		ArrayList<String> temp = new ArrayList<>();
+		temp.add(namespace);
+		return getAllRelationsInNamespace(temp);
+	}
+	@Override
+	public List<Relation> getAllRelationsInNamespace(List<String> namespaces)
+	{
 		ArrayList<Relation> relationsForNamespace = new ArrayList<>();
 		for (Relation r : graph.edgeSet())
 		{
-			if (r.getSource().getCanonicalName().startsWith(namespace))
-				relationsForNamespace.add(r);
+			for (String namespace : namespaces)
+			{
+				if (r.getSource().getCanonicalName().startsWith(namespace))
+					relationsForNamespace.add(r);
+				else if (r.getSource().getName().equals(ReflectionRelationExtractor.NO_TYPE) && r.getDestination().getCanonicalName().startsWith(namespace))
+					relationsForNamespace.add(r);
+			}
 		}
 		return relationsForNamespace;
 	}

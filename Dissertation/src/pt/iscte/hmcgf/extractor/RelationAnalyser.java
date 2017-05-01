@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.poi.hssf.extractor.EventBasedExcelExtractor;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -16,34 +16,46 @@ import pt.iscte.hmcgf.extractor.relations.Relation;
 import pt.iscte.hmcgf.extractor.relations.RelationStorage;
 import pt.iscte.hmcgf.extractor.relations.Type;
 
-public class RelationAnalyser {
+public class RelationAnalyser
+{
 	public static final String DIRECTORY = "exports";
 
-	public static void analiseGraph(String namespace, RelationStorage storage) {
-
+	public static void analiseGraph(String namespace, RelationStorage storage)
+	{
+		ArrayList<String> temp = new ArrayList<>();
+		temp.add(namespace);
+		analiseGraph(temp, storage);
+	}
+	public static void analiseGraph(List<String> namespaces, RelationStorage storage)
+	{
 		HSSFWorkbook workbook = new HSSFWorkbook();
-		sheetAnalysis(namespace, storage, workbook);
-		sheetRelationships(namespace, storage, workbook);
-
-		try {
+		sheetAnalysis(namespaces, storage, workbook);
+		sheetRelationships(namespaces, storage, workbook);
+		try
+		{
 			if (!new File(DIRECTORY).exists())
 				new File(DIRECTORY).mkdir();
-			FileOutputStream out = new FileOutputStream(new File(DIRECTORY + "/" + namespace + ".xls"));
+			FileOutputStream out = new FileOutputStream(new File(DIRECTORY + "/analysis.xls"));
 			workbook.write(out);
 			out.close();
 			System.out.println("Excel written successfully..");
 
-		} catch (FileNotFoundException e) {
+		}
+		catch (FileNotFoundException e)
+		{
 			e.printStackTrace();
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			e.printStackTrace();
 		}
 
 	}
 
-	private static void sheetAnalysis(String namespace, RelationStorage storage, HSSFWorkbook workbook) {
+	private static void sheetAnalysis(List<String> namespace, RelationStorage storage, HSSFWorkbook workbook)
+	{
 		// create sheet for analysis
-		HSSFSheet sheet = workbook.createSheet(namespace);
+		HSSFSheet sheet = workbook.createSheet("INFO");
 		Row row = sheet.createRow(0);
 		Cell cell = row.createCell(0);
 		cell.setCellValue("Type");
@@ -60,8 +72,9 @@ public class RelationAnalyser {
 		cell = row.createCell(6);
 		cell.setCellValue("Is Abstract Class?");
 		int rownum = 1;
-		for (Type vertex : storage.getAllTypes()) {
-			if (!vertex.getCanonicalName().startsWith(namespace))
+		for (Type vertex : storage.getAllTypes())
+		{
+			if (!belongsToNamespaces(vertex.getCanonicalName(), namespace))
 				continue;
 			row = sheet.createRow(rownum++);
 			int cellnum = 0;
@@ -92,7 +105,8 @@ public class RelationAnalyser {
 		sheet.setAutoFilter(new CellRangeAddress(0, rownum - 1, 0, 6));
 	}
 
-	private static void sheetRelationships(String namespace, RelationStorage storage, HSSFWorkbook workbook) {
+	private static void sheetRelationships(List<String> namespace, RelationStorage storage, HSSFWorkbook workbook)
+	{
 		// create sheet for relationship extraction
 		HSSFSheet sheet = workbook.createSheet("Relationships");
 		Row row = sheet.createRow(0);
@@ -120,10 +134,12 @@ public class RelationAnalyser {
 		cell.setCellValue("Estimated cost");
 		// iterate nodes for relationships
 		int rownum = 1;
-		for (Type vertex : storage.getAllTypes()) {
-			if (!vertex.getCanonicalName().startsWith(namespace))
+		for (Type vertex : storage.getAllTypes())
+		{
+			if (!belongsToNamespaces(vertex.getCanonicalName(), namespace))
 				continue;
-			for (Relation relation : storage.getOutgoingRelationsForType(vertex)) {
+			for (Relation relation : storage.getOutgoingRelationsForType(vertex))
+			{
 				row = sheet.createRow(rownum++);
 				int cellnum = 0;
 				cell = row.createCell(cellnum++);
@@ -142,11 +158,7 @@ public class RelationAnalyser {
 				cell = row.createCell(cellnum++);
 				cell.setCellValue(relation.getRelationType().toString());
 				cell = row.createCell(cellnum++);
-				// TODO NULL POINTER
-				if (relation.getIntermediary() == null)
-					cell.setCellValue("------");
-				else
-					cell.setCellValue(relation.getIntermediary().getCanonicalName());
+				cell.setCellValue(relation.getIntermediary().getCanonicalName());
 				cell = row.createCell(cellnum++);
 				cell.setCellValue(relation.isImplicit());
 				cell = row.createCell(cellnum++);
@@ -168,6 +180,17 @@ public class RelationAnalyser {
 		sheet.autoSizeColumn(8);
 		sheet.autoSizeColumn(9);
 		sheet.autoSizeColumn(10);
+	}
+	private static boolean belongsToNamespaces(String canonicalName, List<String> namespaces)
+	{
+		if(canonicalName.equals(ReflectionRelationExtractor.NO_TYPE))
+				return true;
+		for (String n : namespaces)
+		{
+			if (canonicalName.startsWith(n))
+				return true;
+		}
+		return false;
 	}
 
 }
