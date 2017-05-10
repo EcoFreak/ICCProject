@@ -42,7 +42,7 @@ public class RelationSimulator
 	public void simulate(List<String> namespaces, RelationStorage storage, int numLines)
 	{
 		// step 1. get all no cost relations, sort by outgoing types (unique)
-		ReflectionSimulatorComparator comparator = new ReflectionSimulatorComparator(storage);
+		ReflectionSimulatorComparator comparator = new ReflectionSimulatorComparator(storage,new SimpleGainCalulator(storage));
 		RelationWithNoCost noCostFilter = new RelationWithNoCost(scope);
 		NewTypeProduction newTypeFilter = new NewTypeProduction(scope);
 		Collection<Relation> allRelations = storage.getAllRelationsInNamespace(namespaces);
@@ -98,18 +98,15 @@ public class RelationSimulator
 		lastTypeAdded = t;
 		System.out.println(r.getUsageExample());
 	}
-	
-	private void processTypeForStack(Type t){
+
+	private void processTypeForStack(Type t)
+	{
 		if (!scope.contains(t))
 			scope.add(t);
 
 		/*
-		 for (Type subtype : t.getSupertypes())
-		{
-			if (!scope.contains(subtype))
-				scope.add(subtype);
-		}
-		*/
+		 * for (Type subtype : t.getSupertypes()) { if (!scope.contains(subtype)) scope.add(subtype); }
+		 */
 	}
 	public static void filterRelations(List<Relation> col, Filter<Relation> filter)
 	{
@@ -130,11 +127,13 @@ public class RelationSimulator
 
 	public class ReflectionSimulatorComparator implements Comparator<Relation>
 	{
-		private RelationStorage storage;
+		private RelationStorage			storage;
+		private GainCalculator<Type>	calculator;
 
-		public ReflectionSimulatorComparator(RelationStorage storage)
+		public ReflectionSimulatorComparator(RelationStorage storage, GainCalculator<Type> calculator)
 		{
 			this.storage = storage;
+			this.calculator = calculator;
 		}
 
 		@Override
@@ -155,11 +154,12 @@ public class RelationSimulator
 			// storage.getOutgoingRelationsForType(r2.getDestination()).size()
 			// -
 			// storage.getOutgoingRelationsForType(r1.getDestination()).size();
-			return RelationStorage
-					.getUniqueOutgoingTypesForRelationshipSet(storage.getOutgoingRelationsForType(r2.getDestination()))
-					.size()
-					- RelationStorage.getUniqueOutgoingTypesForRelationshipSet(
-							storage.getOutgoingRelationsForType(r1.getDestination())).size();
+			if( calculator.calculateGainForType(r2.getDestination()) > calculator.calculateGainForType(r1.getDestination())){
+				return 1;
+			}
+			else if(calculator.calculateGainForType(r2.getDestination()) < calculator.calculateGainForType(r1.getDestination()))
+				return -1;
+			return 0;
 		}
 	}
 
@@ -199,8 +199,28 @@ public class RelationSimulator
 
 	}
 
-	public interface Filter<T>
+	public interface Filter<R extends Relation>
 	{
-		public boolean filter(T t);
+		public boolean filter(R r);
+	}
+
+	public interface GainCalculator<T extends Type>
+	{
+		public double calculateGainForType(T t);
+	}
+
+	public class SimpleGainCalulator implements GainCalculator<Type>
+	{
+		private RelationStorage storage;
+		public SimpleGainCalulator(RelationStorage storage)
+		{
+			this.storage = storage;
+		}
+		@Override
+		public double calculateGainForType(Type t)
+		{
+			return RelationStorage.getUniqueOutgoingTypesForRelationshipSet(storage.getOutgoingRelationsForType(t)).size();
+		}
+
 	}
 }
