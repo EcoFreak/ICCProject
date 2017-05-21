@@ -50,8 +50,18 @@ public class InstanceInInstanceMethodRelation extends Relation {
 	}
 
 	@Override
-	public double getBaseValue() {
+	public double getBaseGainValue() {
 		return 0.5;
+	}
+
+	@Override
+	public double getNewTypeGainValue() {
+		return 1-0;
+	}
+
+	@Override
+	public double getUsingTypeGainValue() {
+		return 0;
 	}
 
 }

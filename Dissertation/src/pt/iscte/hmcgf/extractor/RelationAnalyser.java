@@ -6,12 +6,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.poi.hssf.extractor.EventBasedExcelExtractor;
+
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
+
 import pt.iscte.hmcgf.extractor.relations.Relation;
 import pt.iscte.hmcgf.extractor.relations.RelationStorage;
 import pt.iscte.hmcgf.extractor.relations.Type;

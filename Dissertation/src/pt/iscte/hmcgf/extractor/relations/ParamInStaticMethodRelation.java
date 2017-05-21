@@ -42,13 +42,26 @@ public class ParamInStaticMethodRelation extends Relation {
 	@Override
 	public String getUsageExample() {
 		String d = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, destination.getName());
+		if(destination.getName().equals("void"))
+			return String.format("%s.%s(%s);", intermediary.getName(),
+					methodName, this.getInternalParamentersString());
 		return String.format("%s %s = %s.%s(%s);", destination.getName(), d, intermediary.getName(),
 				methodName, this.getInternalParamentersString());
 	}
 
 	@Override
-	public double getBaseValue() {
-		return 1.0;
+	public double getBaseGainValue() {
+		return 2.0;
+	}
+
+	@Override
+	public double getNewTypeGainValue() {
+		return 1;
+	}
+
+	@Override
+	public double getUsingTypeGainValue() {
+		return 5;
 	}
 
 }

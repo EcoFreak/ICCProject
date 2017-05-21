@@ -129,7 +129,11 @@ public abstract class Relation {
 
 	public abstract double calculateCost(List<Type> types);
 	
-	public abstract double getBaseValue();
+	public abstract double getBaseGainValue();
+	
+	public abstract double getNewTypeGainValue();
+	
+	public abstract double getUsingTypeGainValue();
 
 	public abstract String getUsageExample();
 

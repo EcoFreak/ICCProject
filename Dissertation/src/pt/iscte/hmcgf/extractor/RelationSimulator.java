@@ -13,7 +13,7 @@ import pt.iscte.hmcgf.extractor.relations.RelationStorage;
 import pt.iscte.hmcgf.extractor.relations.Type;
 
 public class RelationSimulator {
-	private static final int NUM_SUGGESTIONS = 30;
+	private static final int NUM_SUGGESTIONS = 10;
 	private List<Type> scope;
 	private Type lastTypeAdded;
 	private boolean chooseFirst;
@@ -35,8 +35,8 @@ public class RelationSimulator {
 
 	public void simulate(List<String> namespaces, RelationStorage storage, int numLines) {
 		// step 1. get all no cost relations, sort by outgoing types (unique)
-		ReflectionSimulatorComparator comparator = new ReflectionSimulatorComparator(storage,
-				new SimpleGainCalulator(storage));
+		GainCalculator<Relation> calculator = new SimpleGainCalulator(storage);
+		ReflectionSimulatorComparator comparator = new ReflectionSimulatorComparator(storage, calculator);
 		RelationWithNoCost noCostFilter = new RelationWithNoCost(scope);
 		NewTypeProduction newTypeFilter = new NewTypeProduction(scope);
 		Collection<Relation> allRelations = storage.getAllRelationsInNamespace(namespaces);
@@ -50,8 +50,10 @@ public class RelationSimulator {
 		// types (unique)
 		for (int i = 1; i < numLines; i++) {
 			System.out.println(scope);
-			 List<Relation> auxList = new ArrayList<>(allRelations);
-			//List<Relation> auxList = storage.getOutgoingRelationsForType(lastTypeAdded);
+			calculator.setScope(scope);
+			List<Relation> auxList = new ArrayList<>(allRelations);
+			// List<Relation> auxList =
+			// storage.getOutgoingRelationsForType(lastTypeAdded);
 			filterRelations(auxList, noCostFilter);
 			filterRelations(auxList, newTypeFilter);
 			Collections.sort(auxList, comparator);
@@ -88,10 +90,11 @@ public class RelationSimulator {
 		if (!scope.contains(t))
 			scope.add(t);
 
-		/*
-		 * for (Type subtype : t.getSupertypes()) { if
-		 * (!scope.contains(subtype)) scope.add(subtype); }
-		 */
+		for (Type subtype : t.getSupertypes()) {
+			if (!scope.contains(subtype))
+				scope.add(subtype);
+		}
+
 	}
 
 	public static void filterRelations(List<Relation> col, Filter<Relation> filter) {
@@ -109,9 +112,9 @@ public class RelationSimulator {
 
 	public class ReflectionSimulatorComparator implements Comparator<Relation> {
 		private RelationStorage storage;
-		private GainCalculator<Type> calculator;
+		private GainCalculator<Relation> calculator;
 
-		public ReflectionSimulatorComparator(RelationStorage storage, GainCalculator<Type> calculator) {
+		public ReflectionSimulatorComparator(RelationStorage storage, GainCalculator<Relation> calculator) {
 			this.storage = storage;
 			this.calculator = calculator;
 		}
@@ -119,20 +122,8 @@ public class RelationSimulator {
 		@Override
 		public int compare(Relation r1, Relation r2) {
 
-			/*
-			 * if (r1.getRelationType().equals(Relation.RelationType.
-			 * PARAM_IN_CONSTRUCTOR) &&
-			 * !r2.getRelationType().equals(Relation.RelationType.
-			 * PARAM_IN_CONSTRUCTOR)) return -1; else if
-			 * (!r1.getRelationType().equals(Relation.RelationType.
-			 * PARAM_IN_CONSTRUCTOR) &&
-			 * r2.getRelationType().equals(Relation.RelationType.
-			 * PARAM_IN_CONSTRUCTOR)) return 1; return
-			 * storage.getOutgoingRelationsForType(r2.getDestination()).size() -
-			 * storage.getOutgoingRelationsForType(r1.getDestination()).size();
-			 */
-			return (int) Math.ceil((calculator.calculateGainForType(r2.getDestination()) * r2.getBaseValue())
-					- (calculator.calculateGainForType(r1.getDestination()) * r1.getBaseValue()));
+			return (int) ((calculator.calculateGainForRelation(r2) * r2.getBaseGainValue())
+					- (calculator.calculateGainForRelation(r1) * r1.getBaseGainValue()));
 		}
 	}
 
@@ -170,21 +161,32 @@ public class RelationSimulator {
 		public boolean filter(R r);
 	}
 
-	public interface GainCalculator<T extends Type> {
-		public int calculateGainForType(T t);
+	public interface GainCalculator<R extends Relation> {
+		public double calculateGainForRelation(R r);
+
+		public void setScope(List<Type> scope);
 	}
 
-	public class SimpleGainCalulator implements GainCalculator<Type> {
+	public class SimpleGainCalulator implements GainCalculator<Relation> {
 		private RelationStorage storage;
+		private List<Type> scope;
 
 		public SimpleGainCalulator(RelationStorage storage) {
 			this.storage = storage;
+			this.scope = new ArrayList<>();
+		}
+
+		public void setScope(List<Type> scope) {
+			this.scope = new ArrayList<>(scope);
 		}
 
 		@Override
-		public int calculateGainForType(Type t) {
-			return RelationStorage.getUniqueOutgoingTypesForRelationshipSet(storage.getOutgoingRelationsForType(t))
-					.size();
+		public double calculateGainForRelation(Relation r) {
+			List<Type> auxScope = new ArrayList<>(scope);
+			auxScope.retainAll(r.getInternalParamenters());
+			return (RelationStorage
+					.getUniqueOutgoingTypesForRelationshipSet(storage.getOutgoingRelationsForType(r.getDestination()))
+					.size() * r.getNewTypeGainValue()) + (auxScope.size() * r.getUsingTypeGainValue());
 		}
 
 	}

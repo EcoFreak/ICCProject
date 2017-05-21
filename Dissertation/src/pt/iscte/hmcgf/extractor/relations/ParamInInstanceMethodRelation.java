@@ -50,7 +50,17 @@ public class ParamInInstanceMethodRelation extends Relation {
 	}
 
 	@Override
-	public double getBaseValue() {
+	public double getBaseGainValue() {
 		return 0.5;
+	}
+
+	@Override
+	public double getNewTypeGainValue() {
+		return 1;
+	}
+
+	@Override
+	public double getUsingTypeGainValue() {
+		return 1;
 	}
 }

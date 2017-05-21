@@ -9,8 +9,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import io.github.lukehutch.fastclasspathscanner.scanner.ScanResult;
 import pt.iscte.hmcgf.extractor.relations.InstanceInInstanceMethodRelation;
@@ -256,16 +258,19 @@ public class ReflectionRelationExtractor implements RelationExtractor
 			String fixedName = canonicalName.replaceAll("\\[\\]", "");
 			try
 			{
+				//This removes strange annonymous classes not being defined as so by Class, like javax.mail.Session$1
+				if(canonicalName.contains("$"))
+					return null;
 				Class<?> c = Class.forName(fixedName);
 				t = new Type(fixedName, !belongsToNamespaces(canonicalName), areAllMethodsStatic(c.getMethods()),
 						c.isEnum(), Modifier.isAbstract(c.getModifiers()),
 						containsMethodByName(c.getDeclaredMethods(), "equals"), c.isPrimitive());
-				for (Class subclass : getSubTypesOfClass(c))
-				{
-					Type subtype = getTypeForClass(subclass);
-					if (subtype != null)
-						t.getSubtypes().add(subtype);
-				}
+//				for (Class subclass : getSubTypesOfClass(c))
+//				{
+//					Type subtype = getTypeForClass(subclass);
+//					if (subtype != null)
+//						t.getSubtypes().add(subtype);
+//				}
 				for (Class superclass : getSuperTypesOfClass(c))
 				{
 					Type supertype = getTypeForClass(superclass );
@@ -275,6 +280,7 @@ public class ReflectionRelationExtractor implements RelationExtractor
 			}
 			catch (Throwable e)
 			{
+				//System.out.println(e);
 				return null;
 			}
 			storedTypes.put(canonicalName, t);
