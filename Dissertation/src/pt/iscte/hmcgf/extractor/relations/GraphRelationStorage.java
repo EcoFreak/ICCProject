@@ -25,7 +25,6 @@ public class GraphRelationStorage implements RelationStorage
 	{
 		if (r != null)
 		{
-
 			prep(r.getSource(), r.getDestination());
 			if (!graph.containsEdge(r))
 				return graph.addEdge(r.getSource(), r.getDestination(), r);
@@ -34,6 +33,9 @@ public class GraphRelationStorage implements RelationStorage
 		return false;
 	}
 
+	public DirectedPseudograph<Type, Relation> getGraph(){
+		return this.graph ;
+	}
 	@Override
 	public int getTypeCount()
 	{

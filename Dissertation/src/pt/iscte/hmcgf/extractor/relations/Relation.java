@@ -128,6 +128,8 @@ public abstract class Relation {
 	public abstract double calculateCost();
 
 	public abstract double calculateCost(List<Type> types);
+	
+	public abstract double getBaseValue();
 
 	public abstract String getUsageExample();
 

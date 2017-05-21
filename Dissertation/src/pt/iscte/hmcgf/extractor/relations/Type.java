@@ -68,7 +68,8 @@ public class Type
 	@Override
 	public String toString()
 	{
-		return this.canonicalName;
+		//return this.canonicalName;
+		return this.getName();
 	}
 	@Override
 	public boolean equals(Object obj)

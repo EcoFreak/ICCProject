@@ -36,18 +36,19 @@ import com.jgraph.layout.tree.JGraphTreeLayout;
 import com.l2fprod.common.swing.JTaskPane;
 import com.l2fprod.common.swing.JTaskPaneGroup;
 import pt.iscte.hmcgf.extractor.relations.Relation;
+import pt.iscte.hmcgf.extractor.relations.Type;
 
 public class JGraphLayoutPanel extends JPanel
 {
 	private static final long						serialVersionUID	= -1504418916720411157L;
 	protected static JGraphGraphFactory				graphFactory		= new JGraphGraphFactory();
 	protected JGraph								graph;
-	protected DirectedPseudograph<String, Relation>	sourceGraph;
+	protected DirectedPseudograph<Type, Relation>	sourceGraph;
 	protected JTaskPane								taskPane			= new JTaskPane();
 	protected JGraphLayoutMorphingManager			morpher				= new JGraphLayoutMorphingManager();
 	protected JSplitPane							splitPane;
 	private JScrollPane								scrollPane;
-	public JGraphLayoutPanel(DirectedPseudograph<String, Relation> graph)
+	public JGraphLayoutPanel(DirectedPseudograph<Type, Relation> graph)
 	{
 		super(new BorderLayout());
 		setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
@@ -158,7 +159,7 @@ public class JGraphLayoutPanel extends JPanel
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				execute(new JGraphSimpleLayout(JGraphSimpleLayout.TYPE_RANDOM, 640, 480));
+				execute(new JGraphSimpleLayout(JGraphSimpleLayout.TYPE_RANDOM, 2000, 2000));
 			}
 		});
 

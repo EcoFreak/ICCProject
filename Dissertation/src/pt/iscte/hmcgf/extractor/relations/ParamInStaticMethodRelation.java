@@ -19,7 +19,7 @@ public class ParamInStaticMethodRelation extends Relation {
 
 	@Override
 	public String toString() {
-		return String.format("%s.%s(%s)", intermediary, methodName, source);
+		return "";//return String.format("%s.%s(%s)", intermediary, methodName, source);
 	}
 
 	@Override
@@ -44,6 +44,11 @@ public class ParamInStaticMethodRelation extends Relation {
 		String d = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, destination.getName());
 		return String.format("%s %s = %s.%s(%s);", destination.getName(), d, intermediary.getName(),
 				methodName, this.getInternalParamentersString());
+	}
+
+	@Override
+	public double getBaseValue() {
+		return 1.0;
 	}
 
 }

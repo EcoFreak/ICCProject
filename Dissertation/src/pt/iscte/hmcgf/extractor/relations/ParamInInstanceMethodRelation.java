@@ -24,7 +24,8 @@ public class ParamInInstanceMethodRelation extends Relation {
 
 	@Override
 	public String toString() {
-		return String.format("(instance of %s).%s(%s)", intermediary, methodName, source);
+		return "";// return String.format("(instance of %s).%s(%s)",
+					// intermediary, methodName, source);
 	}
 
 	@Override
@@ -46,5 +47,10 @@ public class ParamInInstanceMethodRelation extends Relation {
 		String s = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, intermediary.getName());
 		return String.format("%s %s = %s.%s(%s);", destination.getName(), d, s, methodName,
 				this.getInternalParamentersString());
+	}
+
+	@Override
+	public double getBaseValue() {
+		return 0.5;
 	}
 }
