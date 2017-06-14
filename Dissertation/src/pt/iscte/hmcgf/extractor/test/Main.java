@@ -1,6 +1,7 @@
 package pt.iscte.hmcgf.extractor.test;
 
 import pt.iscte.hmcgf.extractor.ReflectionRelationExtractor;
+import pt.iscte.hmcgf.extractor.RelationAnalyser;
 import pt.iscte.hmcgf.extractor.RelationSimulator;
 import pt.iscte.hmcgf.extractor.relations.GraphRelationStorage;
 
@@ -12,12 +13,14 @@ public class Main {
 		GraphRelationStorage s = new GraphRelationStorage();
 		ReflectionRelationExtractor e = new ReflectionRelationExtractor(s);
 		// e.analyseClasses("javax.mail", false);
-		e.analyseClasses("org.jfree.chart", false);
+		String api = "org.apache.pdfbox.util";
+		e.analyseClasses(api, false);
+		// "org.apache.pdfbox"
 		// e.analyseClasses("javax.xml.validation", false);
-		// RelationAnalyser.analiseGraph("javax.mail", s);
+		RelationAnalyser.analiseGraph(api, s);
 		RelationSimulator simulator = new RelationSimulator(false);
-		// simulator.simulate("javax.mail", s, NUM_STEPS);
-		simulator.simulate("org.jfree.chart", s, NUM_STEPS);
+		simulator.simulate(api, s, NUM_STEPS);
+		// simulator.simulate("org.jfree.chart", s, NUM_STEPS);
 		// simulator.simulate("javax.xml.validation", s, NUM_STEPS);
 		// simulator.simulate("org.eclipse.swt", s, NUM_STEPS);
 

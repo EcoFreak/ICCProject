@@ -13,7 +13,7 @@ import pt.iscte.hmcgf.extractor.relations.RelationStorage;
 import pt.iscte.hmcgf.extractor.relations.Type;
 
 public class RelationSimulator {
-	private static final int NUM_SUGGESTIONS = 10;
+	private static final int NUM_SUGGESTIONS = 20;
 	private List<Type> scope;
 	private Type lastTypeAdded;
 	private boolean chooseFirst;
